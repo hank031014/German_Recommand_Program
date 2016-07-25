@@ -42,7 +42,7 @@ namespace german_recommend_program
             else
             {
                 btnSwitch.Text = "一般模式";
-                sentenceAnalyzer.mㄕodeChange(0);
+                sentenceAnalyzer.modeChange(0);
                 btn_analyze.Visible = true;
                 btn_analyze.Enabled = true;
                 writtentxb.TextChanged -= writtentxb_TextChanged;
