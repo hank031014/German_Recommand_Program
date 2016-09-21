@@ -18,11 +18,18 @@ namespace german_recommend_program
         public Form1()
         {
             InitializeComponent();
-            sentenceAnalyzer = new SentenceAnalyzer();
+            sentenceAnalyzer = new SentenceAnalyzer(this);
             writtentxb.TextChanged -= writtentxb_TextChanged;
         }
 
         private void writtentxb_TextChanged(object sender, EventArgs e)
+        {
+            String wtxt = writtentxb.Text;
+            displaybox.Text = wtxt;
+            sentenceAnalyzer.textChange(wtxt);
+        }
+
+        private void btn_analyze_Click(object sender, EventArgs e)
         {
             String wtxt = writtentxb.Text;
             displaybox.Text = wtxt;
@@ -49,11 +56,11 @@ namespace german_recommend_program
             }
         }
 
-        private void btn_analyze_Click(object sender, EventArgs e)
+        public FlowLayoutPanel getFormPanel()
         {
-            String wtxt = writtentxb.Text;
-            displaybox.Text = wtxt;
-            sentenceAnalyzer.textChange(wtxt);
+            return displayPanel;
         }
+
+
     }
 }

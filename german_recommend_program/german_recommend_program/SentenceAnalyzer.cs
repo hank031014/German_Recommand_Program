@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Text.RegularExpressions;
+using System.Diagnostics;
+using System.Windows.Forms;
 
 namespace german_recommend_program
 {
@@ -11,11 +14,12 @@ namespace german_recommend_program
         private int mode;
         private String original_text;
         private List<Sentence> sentences_stack;
-        
+        private Form1 curForm;
 
-        public SentenceAnalyzer()
+        public SentenceAnalyzer(Form1 cur)
         {
             mode = 0;
+            curForm = cur;
             sentences_stack = new List<Sentence>();
         }
 
@@ -26,19 +30,33 @@ namespace german_recommend_program
         public void textChange(String ntxt)
         {
             original_text = ntxt;
-            Char[] seperator = {'.','!','?'};
-            String[] tmp = original_text.Split(seperator);
-            Boolean isExist;
+            String separator = @"(?<=[.!?])";        
+            String[] tmp = Regex.Split(original_text, separator);
+
+            sentences_stack.Clear();
 
             for (int i = 0; i < tmp.Length; i++ )
             {
-                tmp[i] += " .";
-                isExist = sentences_stack.Contains(new Sentence(i, original_text));
-                if (!isExist)
-                {
-                    sentences_stack.Add(new Sentence(i, original_text));
-                }
+                Debug.WriteLine("i_" + i + ": " + tmp[i]);
+                Sentence st = new Sentence(i, tmp[i], curForm);
+                
+                sentences_stack.Insert(i, st); 
+            }
+
+            for (int j = 0; j < sentences_stack.Count; j++)
+            {
+                Debug.WriteLine("j_" + j + ": " + sentences_stack[j].Text);
+                sentences_stack[j].sentenceProperty();
             }
         }
+
+        public void sentenceCheck()
+        {
+
+        }
+
+
+
+
     }
 }
