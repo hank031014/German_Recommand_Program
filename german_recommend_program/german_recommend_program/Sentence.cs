@@ -17,6 +17,12 @@ namespace german_recommend_program
         private List<Words> word_stack;
         private Form1 curForm;
 
+        private GrammarRules gr;
+        private Boolean aux, que, give, sich, time, freq, place;
+        private int start; // 0:一般直述句, 1:問句(動詞前置), 2:受詞或補述前置
+        private int subject; //(主詞) 1:第一人稱單數, 2:第一人稱複數, 3:第二人稱單數, 4:第二人稱複數, 5:第三人稱單數, 6:第三人稱複數, 7:第二人稱單數(Sie)
+        private int tense, obj1, obj2;
+
         public Sentence(int norder, String ntext, Form1 cur)
         {
             order = norder;
@@ -24,6 +30,7 @@ namespace german_recommend_program
             curForm = cur;
             property = 0;
             word_stack = new List<Words>();
+            gr = new GrammarRules();
         }
 
         public int Order
@@ -85,7 +92,47 @@ namespace german_recommend_program
             for (int i = 0; i < tmp.Length; i++)
             {
                 Words word = new Words(tmp[i], curForm);
-                word.wordProperty();
+                gr.KnowWordRoleInSent(word);
+                //word.wordProperty();
+                //word.word_add_label();
+                if (i == 0)
+                {
+                    switch (word.POS)
+                    {
+                        case 0:
+
+                            break;
+                        case 3:
+                            start = 1;
+                            Debug.WriteLine("start:" + start);
+                            break;
+                        case 8:
+                            start = 0;
+                            word.Element = "S";
+                            Debug.WriteLine("start:" + start);
+                            break;
+                    }
+                }
+                else
+                {
+                    switch (word.POS)
+                    {
+                        case 0:
+
+                            break;
+                        case 3:
+                            if(start == 1){
+                                Debug.WriteLine("Eror: Two verb!");
+                            }
+                            break;
+                        case 8:
+                            if (start == 0)
+                            {
+                                Debug.WriteLine("Eror: Two subject!");
+                            }
+                            break;
+                    }
+                }
                 word_stack.Add(word);
                 
             }

@@ -31,6 +31,7 @@ namespace german_recommend_program
 
         private void btn_analyze_Click(object sender, EventArgs e)
         {
+            displayPanel.Controls.Clear();
             String wtxt = writtentxb.Text;
             displaybox.Text = wtxt;
             sentenceAnalyzer.textChange(wtxt);
