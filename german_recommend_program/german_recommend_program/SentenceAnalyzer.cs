@@ -31,13 +31,13 @@ namespace german_recommend_program
         {
             original_text = ntxt;
             String separator = @"(?<=[.!?])";        
-            String[] tmp = Regex.Split(original_text, separator);
-
+            String[] tmp = Regex.Split(original_text, separator).Where(s => s != String.Empty).ToArray<String>();
+            tmp = (from t in tmp  select t.Trim()).ToArray();
             sentences_stack.Clear();
 
             for (int i = 0; i < tmp.Length; i++ )
             {
-                Debug.WriteLine("i_" + i + ": " + tmp[i]);
+                //Debug.WriteLine("i_" + i + ": " + tmp[i]);
                 Sentence st = new Sentence(i, tmp[i], curForm);
                 
                 sentences_stack.Insert(i, st); 
@@ -45,7 +45,7 @@ namespace german_recommend_program
 
             for (int j = 0; j < sentences_stack.Count; j++)
             {
-                Debug.WriteLine("j_" + j + ": " + sentences_stack[j].Text);
+                //Debug.WriteLine("j_" + j + ": " + sentences_stack[j].Text);
                 sentences_stack[j].sentenceProperty();
             }
         }

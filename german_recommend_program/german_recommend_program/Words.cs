@@ -99,48 +99,31 @@ namespace german_recommend_program
         public int wordProperty(Boolean isFirst)
         {
             int poss = 0;
+            Words w;
+            SqlCommand cmd;
+            SqlDataReader dr;
             String sql = "";
             if (isFirst) // is the first word in a sentence
             {
+                sql = String.Empty;
                 sql += "SELECT * FROM general_words WHERE word =N'" + ori_word + "' OR noun_pural=N'" + ori_word + "' ";
                 sql += "OR adj_compa=N'" + ori_word + "' OR adj_super=N'" + ori_word + "' OR verb_present_trans=N'" + ori_word + "' ";
                 sql += "OR verb_past=N'" + ori_word + "' OR verb_pp=N'" + ori_word + "' ORDER BY id ASC";
             }
             else //is NOT the first word in a sentence
             {
+                sql = String.Empty;
                 sql += "SELECT * FROM general_words WHERE word =N'" + ori_word + "' COLLATE Latin1_General_CS_AI OR noun_pural=N'" + ori_word + "' COLLATE Latin1_General_CS_AI ";
                 sql += "OR adj_compa=N'" + ori_word + "' COLLATE Latin1_General_CS_AI OR adj_super=N'" + ori_word + "' COLLATE Latin1_General_CS_AI OR verb_present_trans=N'" + ori_word + "' COLLATE Latin1_General_CS_AI ";
                 sql += "OR verb_past=N'" + ori_word + "' COLLATE Latin1_General_CS_AI OR verb_pp=N'" + ori_word + "' COLLATE Latin1_General_CS_AI ORDER BY id ASC";
             }
-            SqlCommand cmd = new SqlCommand(sql, db);
-            SqlDataReader dr = cmd.ExecuteReader();
+            cmd = new SqlCommand(sql, db);
+            dr = cmd.ExecuteReader();
             
             while (dr.Read())
             {
-                Words w = new Words(word, curForm);
-                    
-                w.id = Int32.Parse(dr[0].ToString());
-                w.english = dr[2].ToString();
-                w.pos = Int32.Parse(dr[3].ToString());
-                w.noun_gender = Int32.Parse(dr[4].ToString());
-                w.noun_pural = dr[5].ToString();
-                w.adj_compa = dr[6].ToString();
-                w.adj_super = dr[7].ToString();
-                w.verb_vt = Int32.Parse(dr[8].ToString());
-                w.verb_give = Int32.Parse(dr[9].ToString());
-                w.verb_sich = Int32.Parse(dr[10].ToString());
-                w.verb_ppaux = Int32.Parse(dr[11].ToString());
-                w.verb_part = dr[12].ToString();
-                w.verb_present_trans = dr[13].ToString();
-                w.verb_prog = dr[14].ToString();
-                w.verb_pp = dr[15].ToString();
-                w.verb_past = dr[16].ToString();
-                w.conj_type = Int32.Parse(dr[17].ToString());
-                w.prep_type = Int32.Parse(dr[18].ToString());
-                w.ori_word = (dr[19].ToString() == "" ? dr[1].ToString() : dr[19].ToString());
-                w.n_case = Int32.Parse(dr[20].ToString());
-                w.prep_type = Int32.Parse(dr[21].ToString());
-                    
+                w = new Words(word, curForm);
+                w = w.addOption(w, dr);     
                 options.Add(w);
                 poss++;
             }
@@ -148,6 +131,113 @@ namespace german_recommend_program
             dr.Dispose();
             cmd.Dispose();
 
+            if (poss == 0)
+            {
+                String[] verb_end = { "e", "est", "et", "st", "t" };
+                String[] other_end = { "e", "er", "es", "en", "em" }; // adj., art. ...
+                String tmp = String.Empty;
+                Boolean isOther = Array.Exists(other_end,
+                           oe =>
+                           {
+                               if (ori_word.EndsWith(oe))
+                               {
+                                   tmp = ori_word.Substring(0, ori_word.LastIndexOf(oe));
+                                   return true;
+                               }
+                               else
+                               {
+                                   return false;
+                               }
+                           });;
+                Boolean isVerb;
+                
+                while (isOther) // guess is not a verb
+                {
+                    if (isFirst) // is the first word in a sentence
+                    {
+                        sql = String.Empty;
+                        sql += "SELECT * FROM general_words WHERE word =N'" + tmp + "' OR noun_pural=N'" + tmp + "' ";
+                        sql += "OR adj_compa=N'" + tmp + "' OR adj_super=N'" + tmp + "' OR verb_present_trans=N'" + tmp + "' ";
+                        sql += "OR verb_past=N'" + tmp + "' OR verb_pp=N'" + tmp + "' ORDER BY id ASC";
+                    }
+                    else //is NOT the first word in a sentence
+                    {
+                        sql = String.Empty;
+                        sql += "SELECT * FROM general_words WHERE word =N'" + tmp + "' COLLATE Latin1_General_CS_AI OR noun_pural=N'" + tmp + "' COLLATE Latin1_General_CS_AI ";
+                        sql += "OR adj_compa=N'" + tmp + "' COLLATE Latin1_General_CS_AI OR adj_super=N'" + tmp + "' COLLATE Latin1_General_CS_AI OR verb_present_trans=N'" + tmp + "' COLLATE Latin1_General_CS_AI ";
+                        sql += "OR verb_past=N'" + tmp + "' COLLATE Latin1_General_CS_AI OR verb_pp=N'" + tmp + "' COLLATE Latin1_General_CS_AI ORDER BY id ASC";
+                    }
+                    cmd = new SqlCommand(sql, db);
+                    dr = cmd.ExecuteReader();
+                    while (dr.Read())
+                    {
+                        w = new Words(word, curForm);
+                        w = addOption(w, dr);
+                        options.Add(w);
+                        poss++;
+                    }
+                    if (options.Count > 0)
+                    {
+                        if (options[0].pos == 2)
+                        {
+                            isOther = false;
+                        }
+                    }
+                    
+                    dr.Close();
+                    dr.Dispose();
+                    cmd.Dispose();
+                    break;
+                }
+                isVerb = Array.Exists(verb_end,
+                            ve =>
+                            {
+                                if (ori_word.EndsWith(ve))
+                                {
+                                    tmp = ori_word.Substring(0, ori_word.LastIndexOf(ve)) + "en";
+                                    return true;
+                                }
+                                else
+                                {
+                                    return false;
+                                }
+                            });
+                while((!isOther || poss == 0) && isVerb) // guess is a verb
+                {
+                    if (isFirst) // is the first word in a sentence
+                    {
+                        sql = String.Empty;
+                        sql += "SELECT * FROM general_words WHERE word =N'" + tmp + "' OR noun_pural=N'" + tmp + "' ";
+                        sql += "OR adj_compa=N'" + tmp + "' OR adj_super=N'" + tmp + "' OR verb_present_trans=N'" + tmp + "' ";
+                        sql += "OR verb_past=N'" + tmp + "' OR verb_pp=N'" + tmp + "' ORDER BY id ASC";
+                    }
+                    else //is NOT the first word in a sentence
+                    {
+                        sql = String.Empty;
+                        sql += "SELECT * FROM general_words WHERE word =N'" + tmp + "' COLLATE Latin1_General_CS_AI OR noun_pural=N'" + tmp + "' COLLATE Latin1_General_CS_AI ";
+                        sql += "OR adj_compa=N'" + tmp + "' COLLATE Latin1_General_CS_AI OR adj_super=N'" + tmp + "' COLLATE Latin1_General_CS_AI OR verb_present_trans=N'" + tmp + "' COLLATE Latin1_General_CS_AI ";
+                        sql += "OR verb_past=N'" + tmp + "' COLLATE Latin1_General_CS_AI OR verb_pp=N'" + tmp + "' COLLATE Latin1_General_CS_AI ORDER BY id ASC";
+                    }
+                    cmd = new SqlCommand(sql, db);
+                    dr = cmd.ExecuteReader();
+                    while (dr.Read())
+                    {
+                        w = new Words(word, curForm);
+                        w = addOption(w, dr);
+                        options.Add(w);
+                        poss++;
+                    }
+                    dr.Close();
+                    dr.Dispose();
+                    cmd.Dispose();
+                    break;
+                }
+                if (poss == 0)
+                {
+                    isCheck = false;
+                }
+            }
+            
             if (poss == 1)
             {
                 id = options[0].id;
@@ -171,6 +261,8 @@ namespace german_recommend_program
                 ori_word = options[0].ori_word;
                 n_case = options[0].n_case;
                 prep_type = options[0].prep_type;
+
+                options.Clear();
             }
             else if (poss > 1)
             {
@@ -180,9 +272,35 @@ namespace german_recommend_program
             return poss;
         }
 
+        private Words addOption(Words w, SqlDataReader dr)
+        {
+            w.id = Int32.Parse(dr[0].ToString());
+            w.english = dr[2].ToString();
+            w.pos = Int32.Parse(dr[3].ToString());
+            w.noun_gender = Int32.Parse(dr[4].ToString());
+            w.noun_pural = dr[5].ToString();
+            w.adj_compa = dr[6].ToString();
+            w.adj_super = dr[7].ToString();
+            w.verb_vt = Int32.Parse(dr[8].ToString());
+            w.verb_give = Int32.Parse(dr[9].ToString());
+            w.verb_sich = Int32.Parse(dr[10].ToString());
+            w.verb_ppaux = Int32.Parse(dr[11].ToString());
+            w.verb_part = dr[12].ToString();
+            w.verb_present_trans = dr[13].ToString();
+            w.verb_prog = dr[14].ToString();
+            w.verb_pp = dr[15].ToString();
+            w.verb_past = dr[16].ToString();
+            w.conj_type = Int32.Parse(dr[17].ToString());
+            w.prep_type = Int32.Parse(dr[18].ToString());
+            w.ori_word = (dr[19].ToString() == "" ? dr[1].ToString() : dr[19].ToString());
+            w.n_case = Int32.Parse(dr[20].ToString());
+            w.prep_type = Int32.Parse(dr[21].ToString());
+            return w;
+        }
+
         private void firstChoose(Boolean isFirst)
         {
-            int[] order = { 1, 8, 3, 2 }; //art. -> pron. -> v. -> n.
+            int[] order = { 1, 8, 3, 2, 6, 5, 4, 7 }; //art. -> pron. -> v. -> n. -> prep. -> conj. -> adj. -> adv.
             for (int j = 0; j < order.Length; j++)
             {
                 for (int i = 0; i < options.Count; i++)
@@ -210,6 +328,8 @@ namespace german_recommend_program
                         ori_word = options[i].ori_word;
                         n_case = options[i].n_case;
                         prep_type = options[i].prep_type;
+
+                        options.RemoveAt(i);
                         return;
                     }
                     if (options[i].pos == order[j])
@@ -235,6 +355,8 @@ namespace german_recommend_program
                         ori_word = options[i].ori_word;
                         n_case = options[i].n_case;
                         prep_type = options[i].prep_type;
+
+                        options.RemoveAt(i);
                         return;
                     }
                 }

@@ -64,27 +64,27 @@ namespace german_recommend_program
 
             if (co == false && qm == false)
             {
-                Debug.WriteLine("一般直述句");
+                //Debug.WriteLine("一般直述句");
                 property = 0;
             }
             if (co == true && qm == false)
             {
-                Debug.WriteLine("子句直述句");
+                //Debug.WriteLine("子句直述句");
                 property = 1;
             }
             else if (co == false && qm == true)
             {
-                Debug.WriteLine("一般問句");
+                //Debug.WriteLine("一般問句");
                 property = 2;
             }
             else if (co == true && qm == true)
             {
-                Debug.WriteLine("子句問句");
+                //Debug.WriteLine("子句問句");
                 property = 3;
             }
             else if (em == true)
             {
-                Debug.WriteLine("感嘆句");
+                //Debug.WriteLine("感嘆句");
                 property = 4;
             }
 
