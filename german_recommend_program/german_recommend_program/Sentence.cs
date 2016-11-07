@@ -91,11 +91,18 @@ namespace german_recommend_program
             String[] tmp = text.Split(' ');
             for (int i = 0; i < tmp.Length; i++)
             {
+                Boolean isFirst;
                 Words word = new Words(tmp[i], curForm);
-                gr.KnowWordRoleInSent(word);
-                //word.wordProperty();
-                //word.word_add_label();
+                word_stack.Add(word);
+                //gr.KnowWordRoleInSent(word, word_stack);
                 if (i == 0)
+                    isFirst = true;
+                else
+                    isFirst = false;
+
+                word.wordProperty(isFirst);
+                //word.word_add_label();
+                /*if (i == 0)
                 {
                     switch (word.POS)
                     {
@@ -132,9 +139,15 @@ namespace german_recommend_program
                             }
                             break;
                     }
-                }
-                word_stack.Add(word);
+                }*/
+                //if (i == 1)
+                    //word.IsCheck = false;
                 
+                
+            }
+            for (int i = 0; i < word_stack.Count; i++)
+            {
+                word_stack[i].word_add_label();
             }
 
         }

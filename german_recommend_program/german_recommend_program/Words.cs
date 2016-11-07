@@ -16,7 +16,7 @@ namespace german_recommend_program
         private Form1 curForm;
         private FlowLayoutPanel formPanel;
         private String marks;
-        private Boolean IsCheck;
+        private Boolean isCheck;
 
         private int id, pos, noun_gender;
         private String word, chinese, english;
@@ -27,6 +27,12 @@ namespace german_recommend_program
         private String ori_word;
         private int n_case, pron_type;
 
+        private String pos_dt;
+
+        private List<Words> options;
+        private int option_cur;
+        private int possibility;
+
         private String element;
         //private String ori_word;
 
@@ -35,7 +41,8 @@ namespace german_recommend_program
 
         public Words(String text, Form1 cur)
         {
-            IsCheck = false;
+            options = new List<Words>();
+            isCheck = true;
             marks = null;
             Regex rqm = new Regex(@"\?");
             Regex rco = new Regex(@",");
@@ -59,58 +66,188 @@ namespace german_recommend_program
             }
 
             word = text.Replace(",", "").Replace(".", "").Replace("!", "").Replace("?", "");
+            ori_word = word;
             curForm = cur;
             formPanel = curForm.getFormPanel();
             cn = @"Data Source=140.116.154.85;" + "Database=german_project;" + "Uid=user;"  + "Pwd=!ncku99!;";
             db = new SqlConnection(cn);
             db.Open();
-            //MessageBox.Show(word + "@@@", "單字");
             
+            String[] sein_verb = { "bin", "sind", "bist", "seid", "ist" };
+            foreach (String sv in sein_verb)
+            {
+                if (word == sv)
+                {
+                    ori_word = "ist";
+                    pos_dt = "v_sn";
+                    break;
+                }
+            }
+            String[] haben_verb = { "hat", "hast", "habt", "habe", "haben" };
+            foreach (String hv in haben_verb)
+            {
+                if (word == hv)
+                {
+                    ori_word = "haben";
+                    pos_dt = "v_hb";
+                    break;
+                }
+            }
         }
 
 
-        public void wordProperty()
+        public int wordProperty(Boolean isFirst)
         {
-            String sql = "SELECT * FROM general_words WHERE word LIKE'" + word + "%'";
+            int poss = 0;
+            String sql = "";
+            if (isFirst) // is the first word in a sentence
+            {
+                sql += "SELECT * FROM general_words WHERE word =N'" + ori_word + "' OR noun_pural=N'" + ori_word + "' ";
+                sql += "OR adj_compa=N'" + ori_word + "' OR adj_super=N'" + ori_word + "' OR verb_present_trans=N'" + ori_word + "' ";
+                sql += "OR verb_past=N'" + ori_word + "' OR verb_pp=N'" + ori_word + "' ORDER BY id ASC";
+            }
+            else //is NOT the first word in a sentence
+            {
+                sql += "SELECT * FROM general_words WHERE word =N'" + ori_word + "' COLLATE Latin1_General_CS_AI OR noun_pural=N'" + ori_word + "' COLLATE Latin1_General_CS_AI ";
+                sql += "OR adj_compa=N'" + ori_word + "' COLLATE Latin1_General_CS_AI OR adj_super=N'" + ori_word + "' COLLATE Latin1_General_CS_AI OR verb_present_trans=N'" + ori_word + "' COLLATE Latin1_General_CS_AI ";
+                sql += "OR verb_past=N'" + ori_word + "' COLLATE Latin1_General_CS_AI OR verb_pp=N'" + ori_word + "' COLLATE Latin1_General_CS_AI ORDER BY id ASC";
+            }
             SqlCommand cmd = new SqlCommand(sql, db);
-            SqlDataReader dr = cmd.ExecuteReader(); 
+            SqlDataReader dr = cmd.ExecuteReader();
+            
             while (dr.Read())
             {
-                if (dr.FieldCount > 0)
-                {
-                    id = Int32.Parse(dr[0].ToString());
-                    english = dr[2].ToString();
-                    pos = Int32.Parse(dr[3].ToString());
-                    noun_gender = Int32.Parse(dr[4].ToString());
-                    noun_pural = dr[5].ToString();
-                    adj_compa = dr[6].ToString();
-                    adj_super = dr[7].ToString();
-                    verb_vt = Int32.Parse(dr[8].ToString());
-                    verb_give = Int32.Parse(dr[9].ToString());
-                    verb_sich = Int32.Parse(dr[10].ToString());
-                    verb_ppaux = Int32.Parse(dr[11].ToString());
-                    verb_part = dr[12].ToString();
-                    verb_present_trans = dr[13].ToString();
-                    verb_prog = dr[14].ToString();
-                    verb_pp = dr[15].ToString();
-                    verb_past = dr[16].ToString();
-                    conj_type = Int32.Parse(dr[17].ToString());
-                    prep_type = Int32.Parse(dr[18].ToString());
-                    ori_word = dr[19].ToString();
-                    n_case = Int32.Parse(dr[20].ToString());
-                    prep_type = Int32.Parse(dr[21].ToString());
-                }              
+                Words w = new Words(word, curForm);
+                    
+                w.id = Int32.Parse(dr[0].ToString());
+                w.english = dr[2].ToString();
+                w.pos = Int32.Parse(dr[3].ToString());
+                w.noun_gender = Int32.Parse(dr[4].ToString());
+                w.noun_pural = dr[5].ToString();
+                w.adj_compa = dr[6].ToString();
+                w.adj_super = dr[7].ToString();
+                w.verb_vt = Int32.Parse(dr[8].ToString());
+                w.verb_give = Int32.Parse(dr[9].ToString());
+                w.verb_sich = Int32.Parse(dr[10].ToString());
+                w.verb_ppaux = Int32.Parse(dr[11].ToString());
+                w.verb_part = dr[12].ToString();
+                w.verb_present_trans = dr[13].ToString();
+                w.verb_prog = dr[14].ToString();
+                w.verb_pp = dr[15].ToString();
+                w.verb_past = dr[16].ToString();
+                w.conj_type = Int32.Parse(dr[17].ToString());
+                w.prep_type = Int32.Parse(dr[18].ToString());
+                w.ori_word = (dr[19].ToString() == "" ? dr[1].ToString() : dr[19].ToString());
+                w.n_case = Int32.Parse(dr[20].ToString());
+                w.prep_type = Int32.Parse(dr[21].ToString());
+                    
+                options.Add(w);
+                poss++;
             }
             dr.Close();
             dr.Dispose();
             cmd.Dispose();
 
-            
+            if (poss == 1)
+            {
+                id = options[0].id;
+                english = options[0].english;
+                pos = options[0].pos;
+                noun_gender = options[0].noun_gender;
+                noun_pural = options[0].noun_pural;
+                adj_compa = options[0].adj_compa;
+                adj_super = options[0].adj_super;
+                verb_vt = options[0].verb_vt;
+                verb_give = options[0].verb_give;
+                verb_sich = options[0].verb_sich;
+                verb_ppaux = options[0].verb_ppaux;
+                verb_part = options[0].verb_part;
+                verb_present_trans = options[0].verb_present_trans;
+                verb_prog = options[0].verb_prog;
+                verb_pp = options[0].verb_pp;
+                verb_past = options[0].verb_past;
+                conj_type = options[0].conj_type;
+                prep_type = options[0].prep_type;
+                ori_word = options[0].ori_word;
+                n_case = options[0].n_case;
+                prep_type = options[0].prep_type;
+            }
+            else if (poss > 1)
+            {
+                firstChoose(isFirst);
+            }
+
+            return poss;
+        }
+
+        private void firstChoose(Boolean isFirst)
+        {
+            int[] order = { 1, 8, 3, 2 }; //art. -> pron. -> v. -> n.
+            for (int j = 0; j < order.Length; j++)
+            {
+                for (int i = 0; i < options.Count; i++)
+                {
+                    if (options[i].pos == order[j] && order[j] == 1 && options[i].n_case == 1)
+                    {
+                        id = options[i].id;
+                        english = options[i].english;
+                        pos = options[i].pos;
+                        noun_gender = options[i].noun_gender;
+                        noun_pural = options[i].noun_pural;
+                        adj_compa = options[i].adj_compa;
+                        adj_super = options[i].adj_super;
+                        verb_vt = options[i].verb_vt;
+                        verb_give = options[i].verb_give;
+                        verb_sich = options[i].verb_sich;
+                        verb_ppaux = options[i].verb_ppaux;
+                        verb_part = options[i].verb_part;
+                        verb_present_trans = options[i].verb_present_trans;
+                        verb_prog = options[i].verb_prog;
+                        verb_pp = options[i].verb_pp;
+                        verb_past = options[i].verb_past;
+                        conj_type = options[i].conj_type;
+                        prep_type = options[i].prep_type;
+                        ori_word = options[i].ori_word;
+                        n_case = options[i].n_case;
+                        prep_type = options[i].prep_type;
+                        return;
+                    }
+                    if (options[i].pos == order[j])
+                    {
+                        id = options[i].id;
+                        english = options[i].english;
+                        pos = options[i].pos;
+                        noun_gender = options[i].noun_gender;
+                        noun_pural = options[i].noun_pural;
+                        adj_compa = options[i].adj_compa;
+                        adj_super = options[i].adj_super;
+                        verb_vt = options[i].verb_vt;
+                        verb_give = options[i].verb_give;
+                        verb_sich = options[i].verb_sich;
+                        verb_ppaux = options[i].verb_ppaux;
+                        verb_part = options[i].verb_part;
+                        verb_present_trans = options[i].verb_present_trans;
+                        verb_prog = options[i].verb_prog;
+                        verb_pp = options[i].verb_pp;
+                        verb_past = options[i].verb_past;
+                        conj_type = options[i].conj_type;
+                        prep_type = options[i].prep_type;
+                        ori_word = options[i].ori_word;
+                        n_case = options[i].n_case;
+                        prep_type = options[i].prep_type;
+                        return;
+                    }
+                }
+            }
         }
 
         public void word_add_label(){
             Label wl = new Label();
-            wl.Text = word;
+            if (!isCheck)
+            {
+                wl.BackColor = Color.Red;
+            }
+            wl.Text = word + " (" + posText(pos) + ")";
             wl.AutoSize = true;
             wl.BorderStyle = BorderStyle.FixedSingle;
             wl.Font = new Font("Microsoft JhengHei", 12);
@@ -134,24 +271,171 @@ namespace german_recommend_program
         protected void label_onclick(object sender, EventArgs e)
         {
             Label tmp = (Label)sender;
-            String sql = "SELECT * FROM general_words WHERE word='" + tmp.Text + "'";
-            SqlCommand cmd = new SqlCommand(sql, db);
-            SqlDataReader dr = cmd.ExecuteReader();
-            //Debug.WriteLine("DR:" + dr.Read());
             String str = "";
-            while (dr.Read())
+
+            str += "單字：" + word;
+            str += "\n單字資料庫ID：" + id;
+            str += "\n單字的原形：" + ori_word;
+            str += "\n英文：" + english;
+            str += "\n詞性：" + posText(pos);
+            str += "\n當前格位：" + nCaseText(n_case);
+
+            MessageBox.Show(str, "資料庫單字讀取結果");          
+        }
+
+        private String posText(int pos)
+        {
+            String txt = "";
+            switch (pos)
             {
-                for (int i = 0; i < dr.FieldCount; i++)
+                case 1:
+                    txt = "冠詞";
+                    break;
+                case 2:
+                    txt = "名詞";
+                    break;
+                case 3:
+                    txt = "動詞";
+                    break;
+                case 4:
+                    txt = "形容詞";
+                    break;
+                case 5:
+                    txt = "連詞";
+                    break;
+                case 6:
+                    txt = "介詞";
+                    break;
+                case 7:
+                    txt = "副詞";
+                    break;
+                case 8:
+                    txt = "代詞";
+                    break;
+                case 9:
+                    txt = "疑問詞";
+                    break;
+                case 10:
+                    txt = "嘆詞";
+                    break;
+                case 11:
+                    txt = "數詞";
+                    break;
+                default:
+                    txt = "Error!";
+                    break;
+            }
+            return txt;
+        }
+
+        private String nCaseText(int n_case)
+        {
+            String txt = "";
+            switch (n_case)
+            {
+                case 1:
+                    txt = "主格(Nom)";
+                    break;
+                case 2:
+                    txt = "屬格(Gen)";
+                    break;
+                case 3:
+                    txt = "與格(Dat)";
+                    break;
+                case 4:
+                    txt = "賓格(Akk)";
+                    break;
+                default:
+                    txt = "無格位";
+                    break;
+            }
+            return txt;
+        }
+
+        public void chooseOption(int Gpos = 1, int Gn_case = 1)
+        {
+            for (int i = 0; i < options.Count; i++)
+            {
+                if (options[i].pos == Gpos && options[i].n_case == Gn_case)
                 {
-                    str += dr.GetName(i) + ": " + dr[i].ToString() + "\n";
+                    id = options[i].id;
+                    english = options[i].english;
+                    pos = options[i].pos;
+                    noun_gender = options[i].noun_gender;
+                    noun_pural = options[i].noun_pural;
+                    adj_compa = options[i].adj_compa;
+                    adj_super = options[i].adj_super;
+                    verb_vt = options[i].verb_vt;
+                    verb_give = options[i].verb_give;
+                    verb_sich = options[i].verb_sich;
+                    verb_ppaux = options[i].verb_ppaux;
+                    verb_part = options[i].verb_part;
+                    verb_present_trans = options[i].verb_present_trans;
+                    verb_prog = options[i].verb_prog;
+                    verb_pp = options[i].verb_pp;
+                    verb_past = options[i].verb_past;
+                    conj_type = options[i].conj_type;
+                    prep_type = options[i].prep_type;
+                    ori_word = options[i].ori_word;
+                    n_case = options[i].n_case;
+                    prep_type = options[i].prep_type;
+                    return;
                 }
             }
+            for (int i = 0; i < options.Count; i++)
+            {
+                if (options[i].pos == 8 && options[i].n_case == Gn_case)
+                {
+                    id = options[i].id;
+                    english = options[i].english;
+                    pos = options[i].pos;
+                    noun_gender = options[i].noun_gender;
+                    noun_pural = options[i].noun_pural;
+                    adj_compa = options[i].adj_compa;
+                    adj_super = options[i].adj_super;
+                    verb_vt = options[i].verb_vt;
+                    verb_give = options[i].verb_give;
+                    verb_sich = options[i].verb_sich;
+                    verb_ppaux = options[i].verb_ppaux;
+                    verb_part = options[i].verb_part;
+                    verb_present_trans = options[i].verb_present_trans;
+                    verb_prog = options[i].verb_prog;
+                    verb_pp = options[i].verb_pp;
+                    verb_past = options[i].verb_past;
+                    conj_type = options[i].conj_type;
+                    prep_type = options[i].prep_type;
+                    ori_word = options[i].ori_word;
+                    n_case = options[i].n_case;
+                    prep_type = options[i].prep_type;
+                    return;
+                }
+            }
+             /*   if (option_cur < options.Count)
+                {
+                    id = options[option_cur].id;
+                    english = options[option_cur].english;
+                    pos = options[option_cur].pos;
+                    noun_gender = options[option_cur].noun_gender;
+                    noun_pural = options[option_cur].noun_pural;
+                    adj_compa = options[option_cur].adj_compa;
+                    adj_super = options[option_cur].adj_super;
+                    verb_vt = options[option_cur].verb_vt;
+                    verb_give = options[option_cur].verb_give;
+                    verb_sich = options[option_cur].verb_sich;
+                    verb_ppaux = options[option_cur].verb_ppaux;
+                    verb_part = options[option_cur].verb_part;
+                    verb_present_trans = options[option_cur].verb_present_trans;
+                    verb_prog = options[option_cur].verb_prog;
+                    verb_pp = options[option_cur].verb_pp;
+                    verb_past = options[option_cur].verb_past;
+                    conj_type = options[option_cur].conj_type;
+                    prep_type = options[option_cur].prep_type;
+                    ori_word = options[option_cur].ori_word;
+                    n_case = options[option_cur].n_case;
+                    prep_type = options[option_cur].prep_type;
 
-            MessageBox.Show(str, "資料庫單字讀取結果");
-            dr.Close();
-            dr.Dispose();
-            cmd.Dispose();
-            //db.Close();
+                    option_cur++;
+                }*/
         }
 
         public int POS
@@ -184,6 +468,30 @@ namespace german_recommend_program
             set
             {
                 element = value;
+            }
+        }
+
+        public int N_case
+        {
+            get
+            {
+                return n_case;
+            }
+        }
+
+        public Boolean IsCheck
+        {
+            set
+            {
+                isCheck = value;
+            }
+        }
+
+        public int Pron_type
+        {
+            get
+            {
+                return pron_type;
             }
         }
     }
