@@ -13,7 +13,7 @@ namespace german_recommend_program
         private String[] sein_verb = { "bin", "sind", "bist", "seid", "ist", "sind", "sind" };
         private String[] verb_end = { "e", "en", "t", "st" };
         private String[] adj_end = {"e", "en", "er", "es", "em", "en" };
-        private List<Words> stack;
+        private List<Words> stack, setz;
         enum Role { A, F, S, V1, V2, O1, O2, Adv, SS };
         /*          0  1  2  3   4   5   6   7    8  */
         //Rule 1: 0_1_2_(7)_(5)_(6)_(3)_(4)_(,)_(9)
@@ -24,11 +24,11 @@ namespace german_recommend_program
 
         private int subj, aux, v, obj1, obj2, sich, give, subs;
 
-        public GrammarRules()
+        public GrammarRules(List<Words> setz)
         {
+            this.setz = setz;
             stack = new List<Words>();
             state = 0;
-
         }
 
         public void KnowWordRoleInSent(Words word, List<Words> sen)

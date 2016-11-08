@@ -39,7 +39,7 @@ namespace german_recommend_program
         private string cn;
         private SqlConnection db;
 
-        public Words(String text, Form1 cur)
+        public Words(String text, Form1 cur, SqlConnection db)
         {
             options = new List<Words>();
             isCheck = true;
@@ -68,10 +68,8 @@ namespace german_recommend_program
             word = text.Replace(",", "").Replace(".", "").Replace("!", "").Replace("?", "");
             ori_word = word;
             curForm = cur;
+            this.db = db;
             formPanel = curForm.getFormPanel();
-            cn = @"Data Source=140.116.154.85;" + "Database=german_project;" + "Uid=user;"  + "Pwd=!ncku99!;";
-            db = new SqlConnection(cn);
-            db.Open();
             
             String[] sein_verb = { "bin", "sind", "bist", "seid", "ist" };
             foreach (String sv in sein_verb)
@@ -122,7 +120,7 @@ namespace german_recommend_program
             
             while (dr.Read())
             {
-                w = new Words(word, curForm);
+                w = new Words(word, curForm, db);
                 w = w.addOption(w, dr);     
                 options.Add(w);
                 poss++;
@@ -171,7 +169,7 @@ namespace german_recommend_program
                     dr = cmd.ExecuteReader();
                     while (dr.Read())
                     {
-                        w = new Words(word, curForm);
+                        w = new Words(word, curForm, db);
                         w = addOption(w, dr);
                         options.Add(w);
                         poss++;
@@ -222,7 +220,7 @@ namespace german_recommend_program
                     dr = cmd.ExecuteReader();
                     while (dr.Read())
                     {
-                        w = new Words(word, curForm);
+                        w = new Words(word, curForm, db);
                         w = addOption(w, dr);
                         options.Add(w);
                         poss++;

@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Text.RegularExpressions;
 using System.Diagnostics;
 using System.Windows.Forms;
+using System.Data.SqlClient;
 
 namespace german_recommend_program
 {
@@ -15,11 +16,13 @@ namespace german_recommend_program
         private String original_text;
         private List<Sentence> sentences_stack;
         private Form1 curForm;
+        private SqlConnection db;
 
-        public SentenceAnalyzer(Form1 cur)
+        public SentenceAnalyzer(Form1 cur, SqlConnection db)
         {
             mode = 0;
             curForm = cur;
+            this.db = db;
             sentences_stack = new List<Sentence>();
         }
 
@@ -38,7 +41,7 @@ namespace german_recommend_program
             for (int i = 0; i < tmp.Length; i++ )
             {
                 //Debug.WriteLine("i_" + i + ": " + tmp[i]);
-                Sentence st = new Sentence(i, tmp[i], curForm);
+                Sentence st = new Sentence(i, tmp[i], curForm, db);
                 
                 sentences_stack.Insert(i, st); 
             }

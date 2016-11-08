@@ -128,8 +128,12 @@
   <data name="writtentxb.Multiline" type="System.Boolean, mscorlib">
     <value>True</value>
   </data>
+  <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
+  <data name="writtentxb.ScrollBars" type="System.Windows.Forms.ScrollBars, System.Windows.Forms">
+    <value>Vertical</value>
+  </data>
   <data name="writtentxb.Size" type="System.Drawing.Size, System.Drawing">
-    <value>675, 123</value>
+    <value>675, 204</value>
   </data>
   <data name="writtentxb.TabIndex" type="System.Int32, mscorlib">
     <value>0</value>
@@ -144,33 +148,8 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;writtentxb.ZOrder" xml:space="preserve">
-    <value>4</value>
+    <value>5</value>
   </data>
-  <data name="displaybox.Font" type="System.Drawing.Font, System.Drawing">
-    <value>新細明體, 12pt</value>
-  </data>
-  <data name="displaybox.Location" type="System.Drawing.Point, System.Drawing">
-    <value>565, 22</value>
-  </data>
-  <data name="displaybox.Size" type="System.Drawing.Size, System.Drawing">
-    <value>291, 152</value>
-  </data>
-  <data name="displaybox.TabIndex" type="System.Int32, mscorlib">
-    <value>1</value>
-  </data>
-  <data name="&gt;&gt;displaybox.Name" xml:space="preserve">
-    <value>displaybox</value>
-  </data>
-  <data name="&gt;&gt;displaybox.Type" xml:space="preserve">
-    <value>System.Windows.Forms.Label, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;displaybox.Parent" xml:space="preserve">
-    <value>$this</value>
-  </data>
-  <data name="&gt;&gt;displaybox.ZOrder" xml:space="preserve">
-    <value>3</value>
-  </data>
-  <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
   <data name="btnSwitch.Appearance" type="System.Windows.Forms.Appearance, System.Windows.Forms">
     <value>Button</value>
   </data>
@@ -205,7 +184,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;btnSwitch.ZOrder" xml:space="preserve">
-    <value>2</value>
+    <value>4</value>
   </data>
   <data name="btn_analyze.Font" type="System.Drawing.Font, System.Drawing">
     <value>微軟正黑體, 12pt</value>
@@ -232,13 +211,19 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;btn_analyze.ZOrder" xml:space="preserve">
-    <value>1</value>
+    <value>3</value>
+  </data>
+  <data name="displayPanel.AutoScroll" type="System.Boolean, mscorlib">
+    <value>True</value>
+  </data>
+  <data name="displayPanel.Font" type="System.Drawing.Font, System.Drawing">
+    <value>新細明體, 12pt</value>
   </data>
   <data name="displayPanel.Location" type="System.Drawing.Point, System.Drawing">
-    <value>179, 22</value>
+    <value>179, 12</value>
   </data>
   <data name="displayPanel.Size" type="System.Drawing.Size, System.Drawing">
-    <value>365, 152</value>
+    <value>675, 182</value>
   </data>
   <data name="displayPanel.TabIndex" type="System.Int32, mscorlib">
     <value>4</value>
@@ -253,6 +238,336 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;displayPanel.ZOrder" xml:space="preserve">
+    <value>2</value>
+  </data>
+  <data name="btn_big_ae.Font" type="System.Drawing.Font, System.Drawing">
+    <value>微軟正黑體, 12pt</value>
+  </data>
+  <data name="btn_big_ae.Location" type="System.Drawing.Point, System.Drawing">
+    <value>3, 3</value>
+  </data>
+  <data name="btn_big_ae.Size" type="System.Drawing.Size, System.Drawing">
+    <value>45, 45</value>
+  </data>
+  <data name="btn_big_ae.TabIndex" type="System.Int32, mscorlib">
+    <value>5</value>
+  </data>
+  <data name="btn_big_ae.Text" xml:space="preserve">
+    <value>Ä</value>
+  </data>
+  <data name="&gt;&gt;btn_big_ae.Name" xml:space="preserve">
+    <value>btn_big_ae</value>
+  </data>
+  <data name="&gt;&gt;btn_big_ae.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Button, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;btn_big_ae.Parent" xml:space="preserve">
+    <value>flowLayoutPanel1</value>
+  </data>
+  <data name="&gt;&gt;btn_big_ae.ZOrder" xml:space="preserve">
+    <value>0</value>
+  </data>
+  <data name="&gt;&gt;btn_small_ae.Name" xml:space="preserve">
+    <value>btn_small_ae</value>
+  </data>
+  <data name="&gt;&gt;btn_small_ae.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Button, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;btn_small_ae.Parent" xml:space="preserve">
+    <value>flowLayoutPanel1</value>
+  </data>
+  <data name="&gt;&gt;btn_small_ae.ZOrder" xml:space="preserve">
+    <value>1</value>
+  </data>
+  <data name="&gt;&gt;btn_big_oe.Name" xml:space="preserve">
+    <value>btn_big_oe</value>
+  </data>
+  <data name="&gt;&gt;btn_big_oe.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Button, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;btn_big_oe.Parent" xml:space="preserve">
+    <value>flowLayoutPanel1</value>
+  </data>
+  <data name="&gt;&gt;btn_big_oe.ZOrder" xml:space="preserve">
+    <value>2</value>
+  </data>
+  <data name="&gt;&gt;btn_small_oe.Name" xml:space="preserve">
+    <value>btn_small_oe</value>
+  </data>
+  <data name="&gt;&gt;btn_small_oe.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Button, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;btn_small_oe.Parent" xml:space="preserve">
+    <value>flowLayoutPanel1</value>
+  </data>
+  <data name="&gt;&gt;btn_small_oe.ZOrder" xml:space="preserve">
+    <value>3</value>
+  </data>
+  <data name="&gt;&gt;btn_big_ue.Name" xml:space="preserve">
+    <value>btn_big_ue</value>
+  </data>
+  <data name="&gt;&gt;btn_big_ue.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Button, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;btn_big_ue.Parent" xml:space="preserve">
+    <value>flowLayoutPanel1</value>
+  </data>
+  <data name="&gt;&gt;btn_big_ue.ZOrder" xml:space="preserve">
+    <value>4</value>
+  </data>
+  <data name="&gt;&gt;btn_small_ue.Name" xml:space="preserve">
+    <value>btn_small_ue</value>
+  </data>
+  <data name="&gt;&gt;btn_small_ue.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Button, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;btn_small_ue.Parent" xml:space="preserve">
+    <value>flowLayoutPanel1</value>
+  </data>
+  <data name="&gt;&gt;btn_small_ue.ZOrder" xml:space="preserve">
+    <value>5</value>
+  </data>
+  <data name="&gt;&gt;btn_ss.Name" xml:space="preserve">
+    <value>btn_ss</value>
+  </data>
+  <data name="&gt;&gt;btn_ss.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Button, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;btn_ss.Parent" xml:space="preserve">
+    <value>flowLayoutPanel1</value>
+  </data>
+  <data name="&gt;&gt;btn_ss.ZOrder" xml:space="preserve">
+    <value>6</value>
+  </data>
+  <data name="flowLayoutPanel1.Location" type="System.Drawing.Point, System.Drawing">
+    <value>866, 202</value>
+  </data>
+  <data name="flowLayoutPanel1.Size" type="System.Drawing.Size, System.Drawing">
+    <value>110, 205</value>
+  </data>
+  <data name="flowLayoutPanel1.TabIndex" type="System.Int32, mscorlib">
+    <value>6</value>
+  </data>
+  <data name="&gt;&gt;flowLayoutPanel1.Name" xml:space="preserve">
+    <value>flowLayoutPanel1</value>
+  </data>
+  <data name="&gt;&gt;flowLayoutPanel1.Type" xml:space="preserve">
+    <value>System.Windows.Forms.FlowLayoutPanel, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;flowLayoutPanel1.Parent" xml:space="preserve">
+    <value>$this</value>
+  </data>
+  <data name="&gt;&gt;flowLayoutPanel1.ZOrder" xml:space="preserve">
+    <value>1</value>
+  </data>
+  <data name="btn_small_ae.Font" type="System.Drawing.Font, System.Drawing">
+    <value>微軟正黑體, 12pt</value>
+  </data>
+  <data name="btn_small_ae.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
+  </data>
+  <data name="btn_small_ae.Location" type="System.Drawing.Point, System.Drawing">
+    <value>54, 3</value>
+  </data>
+  <data name="btn_small_ae.Size" type="System.Drawing.Size, System.Drawing">
+    <value>45, 45</value>
+  </data>
+  <data name="btn_small_ae.TabIndex" type="System.Int32, mscorlib">
+    <value>6</value>
+  </data>
+  <data name="btn_small_ae.Text" xml:space="preserve">
+    <value>ä</value>
+  </data>
+  <data name="&gt;&gt;btn_small_ae.Name" xml:space="preserve">
+    <value>btn_small_ae</value>
+  </data>
+  <data name="&gt;&gt;btn_small_ae.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Button, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;btn_small_ae.Parent" xml:space="preserve">
+    <value>flowLayoutPanel1</value>
+  </data>
+  <data name="&gt;&gt;btn_small_ae.ZOrder" xml:space="preserve">
+    <value>1</value>
+  </data>
+  <data name="btn_big_oe.Font" type="System.Drawing.Font, System.Drawing">
+    <value>微軟正黑體, 12pt</value>
+  </data>
+  <data name="btn_big_oe.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
+  </data>
+  <data name="btn_big_oe.Location" type="System.Drawing.Point, System.Drawing">
+    <value>3, 54</value>
+  </data>
+  <data name="btn_big_oe.Size" type="System.Drawing.Size, System.Drawing">
+    <value>45, 45</value>
+  </data>
+  <data name="btn_big_oe.TabIndex" type="System.Int32, mscorlib">
+    <value>7</value>
+  </data>
+  <data name="btn_big_oe.Text" xml:space="preserve">
+    <value>Ö</value>
+  </data>
+  <data name="&gt;&gt;btn_big_oe.Name" xml:space="preserve">
+    <value>btn_big_oe</value>
+  </data>
+  <data name="&gt;&gt;btn_big_oe.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Button, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;btn_big_oe.Parent" xml:space="preserve">
+    <value>flowLayoutPanel1</value>
+  </data>
+  <data name="&gt;&gt;btn_big_oe.ZOrder" xml:space="preserve">
+    <value>2</value>
+  </data>
+  <data name="btn_small_oe.Font" type="System.Drawing.Font, System.Drawing">
+    <value>微軟正黑體, 12pt</value>
+  </data>
+  <data name="btn_small_oe.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
+  </data>
+  <data name="btn_small_oe.Location" type="System.Drawing.Point, System.Drawing">
+    <value>54, 54</value>
+  </data>
+  <data name="btn_small_oe.Size" type="System.Drawing.Size, System.Drawing">
+    <value>45, 45</value>
+  </data>
+  <data name="btn_small_oe.TabIndex" type="System.Int32, mscorlib">
+    <value>8</value>
+  </data>
+  <data name="btn_small_oe.Text" xml:space="preserve">
+    <value>ö</value>
+  </data>
+  <data name="&gt;&gt;btn_small_oe.Name" xml:space="preserve">
+    <value>btn_small_oe</value>
+  </data>
+  <data name="&gt;&gt;btn_small_oe.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Button, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;btn_small_oe.Parent" xml:space="preserve">
+    <value>flowLayoutPanel1</value>
+  </data>
+  <data name="&gt;&gt;btn_small_oe.ZOrder" xml:space="preserve">
+    <value>3</value>
+  </data>
+  <data name="btn_big_ue.Font" type="System.Drawing.Font, System.Drawing">
+    <value>微軟正黑體, 12pt</value>
+  </data>
+  <data name="btn_big_ue.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
+  </data>
+  <data name="btn_big_ue.Location" type="System.Drawing.Point, System.Drawing">
+    <value>3, 105</value>
+  </data>
+  <data name="btn_big_ue.Size" type="System.Drawing.Size, System.Drawing">
+    <value>45, 45</value>
+  </data>
+  <data name="btn_big_ue.TabIndex" type="System.Int32, mscorlib">
+    <value>9</value>
+  </data>
+  <data name="btn_big_ue.Text" xml:space="preserve">
+    <value>Ü</value>
+  </data>
+  <data name="&gt;&gt;btn_big_ue.Name" xml:space="preserve">
+    <value>btn_big_ue</value>
+  </data>
+  <data name="&gt;&gt;btn_big_ue.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Button, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;btn_big_ue.Parent" xml:space="preserve">
+    <value>flowLayoutPanel1</value>
+  </data>
+  <data name="&gt;&gt;btn_big_ue.ZOrder" xml:space="preserve">
+    <value>4</value>
+  </data>
+  <data name="btn_small_ue.Font" type="System.Drawing.Font, System.Drawing">
+    <value>微軟正黑體, 12pt</value>
+  </data>
+  <data name="btn_small_ue.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
+  </data>
+  <data name="btn_small_ue.Location" type="System.Drawing.Point, System.Drawing">
+    <value>54, 105</value>
+  </data>
+  <data name="btn_small_ue.Size" type="System.Drawing.Size, System.Drawing">
+    <value>45, 45</value>
+  </data>
+  <data name="btn_small_ue.TabIndex" type="System.Int32, mscorlib">
+    <value>10</value>
+  </data>
+  <data name="btn_small_ue.Text" xml:space="preserve">
+    <value>ü</value>
+  </data>
+  <data name="&gt;&gt;btn_small_ue.Name" xml:space="preserve">
+    <value>btn_small_ue</value>
+  </data>
+  <data name="&gt;&gt;btn_small_ue.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Button, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;btn_small_ue.Parent" xml:space="preserve">
+    <value>flowLayoutPanel1</value>
+  </data>
+  <data name="&gt;&gt;btn_small_ue.ZOrder" xml:space="preserve">
+    <value>5</value>
+  </data>
+  <data name="btn_ss.Font" type="System.Drawing.Font, System.Drawing">
+    <value>微軟正黑體, 12pt</value>
+  </data>
+  <data name="btn_ss.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
+  </data>
+  <data name="btn_ss.Location" type="System.Drawing.Point, System.Drawing">
+    <value>3, 156</value>
+  </data>
+  <data name="btn_ss.Size" type="System.Drawing.Size, System.Drawing">
+    <value>45, 45</value>
+  </data>
+  <data name="btn_ss.TabIndex" type="System.Int32, mscorlib">
+    <value>11</value>
+  </data>
+  <data name="btn_ss.Text" xml:space="preserve">
+    <value>ß</value>
+  </data>
+  <data name="&gt;&gt;btn_ss.Name" xml:space="preserve">
+    <value>btn_ss</value>
+  </data>
+  <data name="&gt;&gt;btn_ss.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Button, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;btn_ss.Parent" xml:space="preserve">
+    <value>flowLayoutPanel1</value>
+  </data>
+  <data name="&gt;&gt;btn_ss.ZOrder" xml:space="preserve">
+    <value>6</value>
+  </data>
+  <data name="lb_de.Font" type="System.Drawing.Font, System.Drawing">
+    <value>微軟正黑體, 12pt</value>
+  </data>
+  <data name="lb_de.Location" type="System.Drawing.Point, System.Drawing">
+    <value>866, 181</value>
+  </data>
+  <data name="lb_de.Size" type="System.Drawing.Size, System.Drawing">
+    <value>110, 22</value>
+  </data>
+  <data name="lb_de.TabIndex" type="System.Int32, mscorlib">
+    <value>7</value>
+  </data>
+  <data name="lb_de.Text" xml:space="preserve">
+    <value>德文字母</value>
+  </data>
+  <data name="lb_de.TextAlign" type="System.Drawing.ContentAlignment, System.Drawing">
+    <value>MiddleCenter</value>
+  </data>
+  <data name="&gt;&gt;lb_de.Name" xml:space="preserve">
+    <value>lb_de</value>
+  </data>
+  <data name="&gt;&gt;lb_de.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Label, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;lb_de.Parent" xml:space="preserve">
+    <value>$this</value>
+  </data>
+  <data name="&gt;&gt;lb_de.ZOrder" xml:space="preserve">
     <value>0</value>
   </data>
   <metadata name="$this.Localizable" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
@@ -261,8 +576,14 @@
   <data name="$this.AutoScaleDimensions" type="System.Drawing.SizeF, System.Drawing">
     <value>6, 12</value>
   </data>
+  <data name="$this.AutoScroll" type="System.Boolean, mscorlib">
+    <value>True</value>
+  </data>
+  <data name="$this.AutoScrollMinSize" type="System.Drawing.Size, System.Drawing">
+    <value>675, 182</value>
+  </data>
   <data name="$this.ClientSize" type="System.Drawing.Size, System.Drawing">
-    <value>917, 356</value>
+    <value>988, 419</value>
   </data>
   <data name="$this.Text" xml:space="preserve">
     <value>Write in  German</value>

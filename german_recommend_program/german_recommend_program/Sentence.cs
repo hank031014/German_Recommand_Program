@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.SqlClient;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
@@ -16,6 +17,7 @@ namespace german_recommend_program
         private int property; //0:一般(無子句)直述句, 1:有子句直述句, 2:問句&無子句(?), 3:問句&有子句(?), 4:感嘆句(!)
         private List<Words> word_stack;
         private Form1 curForm;
+        private SqlConnection db;
 
         private GrammarRules gr;
         private Boolean aux, que, give, sich, time, freq, place;
@@ -23,14 +25,15 @@ namespace german_recommend_program
         private int subject; //(主詞) 1:第一人稱單數, 2:第一人稱複數, 3:第二人稱單數, 4:第二人稱複數, 5:第三人稱單數, 6:第三人稱複數, 7:第二人稱單數(Sie)
         private int tense, obj1, obj2;
 
-        public Sentence(int norder, String ntext, Form1 cur)
+        public Sentence(int norder, String ntext, Form1 cur, SqlConnection db)
         {
             order = norder;
             text = ntext;
             curForm = cur;
+            this.db = db;
             property = 0;
             word_stack = new List<Words>();
-            gr = new GrammarRules();
+            
         }
 
         public int Order
@@ -92,7 +95,7 @@ namespace german_recommend_program
             for (int i = 0; i < tmp.Length; i++)
             {
                 Boolean isFirst;
-                Words word = new Words(tmp[i], curForm);
+                Words word = new Words(tmp[i], curForm, db);
                 word_stack.Add(word);
                 //gr.KnowWordRoleInSent(word, word_stack);
                 if (i == 0)
@@ -100,51 +103,11 @@ namespace german_recommend_program
                 else
                     isFirst = false;
 
-                word.wordProperty(isFirst);
-                //word.word_add_label();
-                /*if (i == 0)
-                {
-                    switch (word.POS)
-                    {
-                        case 0:
-
-                            break;
-                        case 3:
-                            start = 1;
-                            Debug.WriteLine("start:" + start);
-                            break;
-                        case 8:
-                            start = 0;
-                            word.Element = "S";
-                            Debug.WriteLine("start:" + start);
-                            break;
-                    }
-                }
-                else
-                {
-                    switch (word.POS)
-                    {
-                        case 0:
-
-                            break;
-                        case 3:
-                            if(start == 1){
-                                Debug.WriteLine("Eror: Two verb!");
-                            }
-                            break;
-                        case 8:
-                            if (start == 0)
-                            {
-                                Debug.WriteLine("Eror: Two subject!");
-                            }
-                            break;
-                    }
-                }*/
-                //if (i == 1)
-                    //word.IsCheck = false;
-                
-                
+                word.wordProperty(isFirst);    
             }
+
+            gr = new GrammarRules(word_stack);
+            
             for (int i = 0; i < word_stack.Count; i++)
             {
                 word_stack[i].word_add_label();
