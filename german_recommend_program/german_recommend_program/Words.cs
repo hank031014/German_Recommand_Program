@@ -91,10 +91,20 @@ namespace german_recommend_program
                     break;
                 }
             }
+            String[] werden_verb = { "werde", "werden", "wird", "wirst", "werdet" };
+            foreach (String wv in werden_verb)
+            {
+                if (word == wv)
+                {
+                    ori_word = "werden";
+                    pos_dt = "v_wd";
+                    break;
+                }
+            }
         }
 
 
-        public int wordProperty(Boolean isFirst)
+        public void wordProperty(Boolean isFirst)
         {
             int poss = 0;
             Words w;
@@ -131,7 +141,7 @@ namespace german_recommend_program
 
             if (poss == 0)
             {
-                String[] verb_end = { "e", "est", "et", "st", "t" };
+                String[] verb_end = { "e", "est", "et", "sst", "st", "t" };
                 String[] other_end = { "e", "er", "es", "en", "em" }; // adj., art. ...
                 String tmp = String.Empty;
                 Boolean isOther = Array.Exists(other_end,
@@ -146,7 +156,7 @@ namespace german_recommend_program
                                {
                                    return false;
                                }
-                           });;
+                           });
                 Boolean isVerb;
                 
                 while (isOther) // guess is not a verb
@@ -192,7 +202,15 @@ namespace german_recommend_program
                             {
                                 if (ori_word.EndsWith(ve))
                                 {
-                                    tmp = ori_word.Substring(0, ori_word.LastIndexOf(ve)) + "en";
+                                    if (ve == "sst")
+                                    {
+                                        tmp = ori_word.Substring(0, ori_word.LastIndexOf("t"));
+                                        //Debug.WriteLine("tmp: " + tmp);
+                                    }
+                                    else
+                                    {
+                                        tmp = ori_word.Substring(0, ori_word.LastIndexOf(ve)) + "en";
+                                    }
                                     return true;
                                 }
                                 else
@@ -230,9 +248,54 @@ namespace german_recommend_program
                     cmd.Dispose();
                     break;
                 }
+
+                while (poss == 0 && isVerb)
+                {
+                    tmp = tmp.Substring(0, tmp.Length - 2);
+                    if (isFirst) // is the first word in a sentence
+                    {
+                        sql = String.Empty;
+                        sql += "SELECT * FROM general_words WHERE word =N'" + tmp + "' OR noun_pural=N'" + tmp + "' ";
+                        sql += "OR adj_compa=N'" + tmp + "' OR adj_super=N'" + tmp + "' OR verb_present_trans=N'" + tmp + "' ";
+                        sql += "OR verb_past=N'" + tmp + "' OR verb_pp=N'" + tmp + "' ORDER BY id ASC";
+                    }
+                    else //is NOT the first word in a sentence
+                    {
+                        sql = String.Empty;
+                        sql += "SELECT * FROM general_words WHERE word =N'" + tmp + "' COLLATE Latin1_General_CS_AI OR noun_pural=N'" + tmp + "' COLLATE Latin1_General_CS_AI ";
+                        sql += "OR adj_compa=N'" + tmp + "' COLLATE Latin1_General_CS_AI OR adj_super=N'" + tmp + "' COLLATE Latin1_General_CS_AI OR verb_present_trans=N'" + tmp + "' COLLATE Latin1_General_CS_AI ";
+                        sql += "OR verb_past=N'" + tmp + "' COLLATE Latin1_General_CS_AI OR verb_pp=N'" + tmp + "' COLLATE Latin1_General_CS_AI ORDER BY id ASC";
+                    }
+                    cmd = new SqlCommand(sql, db);
+                    dr = cmd.ExecuteReader();
+                    while (dr.Read())
+                    {
+                        w = new Words(word, curForm, db);
+                        w = addOption(w, dr);
+                        options.Add(w);
+                        poss++;
+                    }
+                    dr.Close();
+                    dr.Dispose();
+                    cmd.Dispose();
+                    break;
+                }
+
                 if (poss == 0)
                 {
-                    isCheck = false;
+                    String f = word.Substring(0, 1);
+                    Regex rgx = new Regex(@"[A-ZÄÖÜ]");
+                    Boolean fistLetter = rgx.IsMatch(f);
+                    if (fistLetter)
+                    {
+                        pos = 12;
+                        n_case = 1;
+                    }
+                    else
+                    {
+                        isCheck = false;
+                    }
+                    
                 }
             }
             
@@ -258,7 +321,7 @@ namespace german_recommend_program
                 prep_type = options[0].prep_type;
                 ori_word = options[0].ori_word;
                 n_case = options[0].n_case;
-                prep_type = options[0].prep_type;
+                pron_type = options[0].pron_type;
 
                 options.Clear();
             }
@@ -267,7 +330,147 @@ namespace german_recommend_program
                 firstChoose(isFirst);
             }
 
-            return poss;
+            if (isCheck)
+            {
+                switch (pos)
+                {
+                    case 1:
+                        if (word.StartsWith("ein") || word.StartsWith("kein"))
+                        {
+                            if (word.EndsWith("e"))
+                            {
+                                n_case = 1;
+                            }
+                            else if (word.EndsWith("es"))
+                            {
+                                n_case = 2;
+                            }
+                            else if (word.EndsWith("em") || word.EndsWith("er"))
+                            {
+                                n_case = 3;
+                            }
+                            else if (word.EndsWith("en"))
+                            {
+                                n_case = 4;
+                            }
+                        }
+                        break;
+                    case 2:
+                        if (word == ori_word)
+                        {
+                            n_case = 1;
+                            pron_type = 5;
+                            pos_dt = "n_s";
+                        }
+                        if (word == noun_pural)
+                        {
+                            n_case = 1;
+                            pron_type = 6;
+                            noun_gender = 4;
+                            pos_dt = "n_pl";
+                        }
+                        break;
+                    case 3:
+                        verbVerify();
+                        break;
+                    case 4:
+
+                        break;
+                    case 5:
+
+                        break;
+                }
+            }
+            
+        }
+
+        private void verbVerify()
+        {
+            String[] vModal = { "können", "sollen", "wollen", "dürfen", "möchten", "müssen", "mögen" };
+            String[] vModal_p = { "kann", "soll", "will", "darf", "muss", "mag" };
+            String[] ends = { "e", "n", "st", "t" };
+            
+            foreach (String vm in vModal) // if is modal verb
+            {
+                if (ori_word == vm)
+                {
+                    pos_dt = "v_md";
+                    foreach (String vmp in vModal_p)
+                    {
+                        if (word == vmp)
+                        {
+                            pos_dt += "_s";
+                            break;
+                        }
+                    }
+                    break;
+                }
+            }
+            if (ori_word == "sein")
+            {
+                switch (word)
+                {
+                    case "bin":
+                        pos_dt = "v_s_sm";
+                        break;
+                    case "bist":
+                    case "warst":
+                        pos_dt = "v_s_y2";
+                        break;
+                    case "ist":
+                        pos_dt = "v_s_s3";
+                        break;
+                    case "sind":
+                    case "waren":
+                        pos_dt = "v_s_pl";
+                        break;
+                    case "seid":
+                    case "wart":
+                        pos_dt = "v_s_s3";
+                        break;
+                    case "war":
+                        pos_dt = "v_s_s";
+                        break;
+                    case "gewesen":
+                        pos_dt = "v_s_pp";
+                        break;
+                }
+                return;
+            }
+            if (String.IsNullOrEmpty(pos_dt)) // normal verb
+            {
+                pos_dt = "v_nm";
+            }
+            if (word == verb_pp) // if verb is pp, then return
+            {
+                pos_dt += "_pp";
+                return;
+            }
+            foreach (String e in ends) // if verb is present or past tense
+            {
+                if (word.EndsWith(e))
+                {
+                    switch (e)
+                    {
+                        case "e":
+                            pos_dt += "_sm";
+                            return;
+                            //break;
+                        case "n":
+                            pos_dt += "_pl";
+                            return;
+                            //break;
+                        case "st":
+                            pos_dt += "_y2";
+                            return;
+                            //break;
+                        case "t":
+                            pos_dt += "_s3";
+                            return;
+                            //break;
+                    }
+                }
+            }
         }
 
         private Words addOption(Words w, SqlDataReader dr)
@@ -292,7 +495,7 @@ namespace german_recommend_program
             w.prep_type = Int32.Parse(dr[18].ToString());
             w.ori_word = (dr[19].ToString() == "" ? dr[1].ToString() : dr[19].ToString());
             w.n_case = Int32.Parse(dr[20].ToString());
-            w.prep_type = Int32.Parse(dr[21].ToString());
+            w.pron_type = Int32.Parse(dr[21].ToString());
             return w;
         }
 
@@ -325,7 +528,7 @@ namespace german_recommend_program
                         prep_type = options[i].prep_type;
                         ori_word = options[i].ori_word;
                         n_case = options[i].n_case;
-                        prep_type = options[i].prep_type;
+                        pron_type = options[i].pron_type;
 
                         options.RemoveAt(i);
                         return;
@@ -398,6 +601,11 @@ namespace german_recommend_program
             str += "\n單字的原形：" + ori_word;
             str += "\n英文：" + english;
             str += "\n詞性：" + posText(pos);
+            if (pos == 2)
+            {
+                str += "\n名詞性別：" + noun_gender;
+            }
+            str += "\n詞性(分析後)：" + pos_dt;
             str += "\n當前格位：" + nCaseText(n_case);
 
             MessageBox.Show(str, "資料庫單字讀取結果");          
@@ -441,6 +649,9 @@ namespace german_recommend_program
                 case 11:
                     txt = "數詞";
                     break;
+                case 12:
+                    txt = "Name";
+                    break;
                 default:
                     txt = "Error!";
                     break;
@@ -474,6 +685,11 @@ namespace german_recommend_program
 
         public void chooseOption(int Gpos = 1, int Gn_case = 1)
         {
+            if (options.Count == 0)
+            {
+                isCheck = false;
+                return;
+            }
             for (int i = 0; i < options.Count; i++)
             {
                 if (options[i].pos == Gpos && options[i].n_case == Gn_case)
@@ -498,7 +714,9 @@ namespace german_recommend_program
                     prep_type = options[i].prep_type;
                     ori_word = options[i].ori_word;
                     n_case = options[i].n_case;
-                    prep_type = options[i].prep_type;
+                    pron_type = options[i].pron_type;
+
+                    options.RemoveAt(i);
                     return;
                 }
             }
@@ -527,35 +745,12 @@ namespace german_recommend_program
                     ori_word = options[i].ori_word;
                     n_case = options[i].n_case;
                     prep_type = options[i].prep_type;
+
+                    options.RemoveAt(i);
                     return;
                 }
             }
-             /*   if (option_cur < options.Count)
-                {
-                    id = options[option_cur].id;
-                    english = options[option_cur].english;
-                    pos = options[option_cur].pos;
-                    noun_gender = options[option_cur].noun_gender;
-                    noun_pural = options[option_cur].noun_pural;
-                    adj_compa = options[option_cur].adj_compa;
-                    adj_super = options[option_cur].adj_super;
-                    verb_vt = options[option_cur].verb_vt;
-                    verb_give = options[option_cur].verb_give;
-                    verb_sich = options[option_cur].verb_sich;
-                    verb_ppaux = options[option_cur].verb_ppaux;
-                    verb_part = options[option_cur].verb_part;
-                    verb_present_trans = options[option_cur].verb_present_trans;
-                    verb_prog = options[option_cur].verb_prog;
-                    verb_pp = options[option_cur].verb_pp;
-                    verb_past = options[option_cur].verb_past;
-                    conj_type = options[option_cur].conj_type;
-                    prep_type = options[option_cur].prep_type;
-                    ori_word = options[option_cur].ori_word;
-                    n_case = options[option_cur].n_case;
-                    prep_type = options[option_cur].prep_type;
-
-                    option_cur++;
-                }*/
+            
         }
 
         public int POS
@@ -565,6 +760,14 @@ namespace german_recommend_program
             }            
         }
 
+        public String POS_dt
+        {
+            get
+            {
+                return pos_dt;
+            }
+        }
+
         public String Text
         {
             get
@@ -572,6 +775,7 @@ namespace german_recommend_program
                 return word;
             }
         }
+
         public String Ori_word
         {
             set
@@ -614,5 +818,14 @@ namespace german_recommend_program
                 return pron_type;
             }
         }
+
+        public int Conj_type
+        {
+            get
+            {
+                return conj_type;
+            }
+        }
+
     }
 }

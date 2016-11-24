@@ -45,6 +45,7 @@ namespace german_recommend_program
             toolTip1.SetToolTip(this.lb_de, "以下是德文特有的字母，點一下按鈕就會將該字母新增到左方輸入框");
 
             sentenceAnalyzer = new SentenceAnalyzer(this, db);
+            writtentxb.Focus();
             writtentxb.TextChanged -= writtentxb_TextChanged;
         }
 
@@ -61,6 +62,7 @@ namespace german_recommend_program
             String wtxt = writtentxb.Text;
             //displaybox.Text = wtxt;
             sentenceAnalyzer.textChange(wtxt);
+            writtentxb.Focus();
         }
 
         private void btnSwitch_Click(object sender, EventArgs e)
@@ -81,6 +83,7 @@ namespace german_recommend_program
                 btn_analyze.Enabled = true;
                 writtentxb.TextChanged -= writtentxb_TextChanged;
             }
+            writtentxb.Focus();
         }
 
         public FlowLayoutPanel getFormPanel()
@@ -92,42 +95,49 @@ namespace german_recommend_program
         {
             String tmp = writtentxb.Text + "Ä";
             writtentxb.Text = tmp;
+            writtentxb.Focus();
         }
 
         private void btn_small_ae_Click(object sender, EventArgs e)
         {
             String tmp = writtentxb.Text + "ä";
             writtentxb.Text = tmp;
+            writtentxb.Focus();
         }
 
         private void btn_big_oe_Click(object sender, EventArgs e)
         {
             String tmp = writtentxb.Text + "Ö";
             writtentxb.Text = tmp;
+            writtentxb.Focus();
         }
 
         private void btn_small_oe_Click(object sender, EventArgs e)
         {
             String tmp = writtentxb.Text + "ö";
             writtentxb.Text = tmp;
+            writtentxb.Focus();
         }
 
         private void btn_big_ue_Click(object sender, EventArgs e)
         {
             String tmp = writtentxb.Text + "Ü";
             writtentxb.Text = tmp;
+            writtentxb.Focus();
         }
 
         private void btn_small_ue_Click(object sender, EventArgs e)
         {
             String tmp = writtentxb.Text + "ü";
             writtentxb.Text = tmp;
+            writtentxb.Focus();
         }
 
         private void btn_ss_Click(object sender, EventArgs e)
         {
             String tmp = writtentxb.Text + "ß";
             writtentxb.Text = tmp;
+            writtentxb.Focus();  
         }
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
