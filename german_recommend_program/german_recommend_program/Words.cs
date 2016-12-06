@@ -16,7 +16,7 @@ namespace german_recommend_program
         private Form1 curForm;
         private FlowLayoutPanel formPanel;
         private String marks;
-        private Boolean isCheck;
+        private Boolean isCheck, isFinished;
 
         private int id, pos, noun_gender;
         private String word, chinese, english;
@@ -43,7 +43,8 @@ namespace german_recommend_program
         {
             options = new List<Words>();
             isCheck = true;
-            marks = null;
+            isFinished = false;
+            marks = String.Empty;
             Regex rqm = new Regex(@"\?");
             Regex rco = new Regex(@",");
             Regex rem = new Regex(@"!");
@@ -473,6 +474,52 @@ namespace german_recommend_program
             }
         }
 
+        public Boolean partVerbSearch(String nPt)
+        {
+            String sql = String.Empty;
+            String nWord = nPt + ori_word;
+            SqlCommand cmd;
+            SqlDataReader dr;
+            Boolean isExist = false;
+
+            sql += "SELECT * FROM general_words WHERE word =N'" + nWord + "' COLLATE Latin1_General_CS_AI";
+            cmd = new SqlCommand(sql, db);
+            dr = cmd.ExecuteReader();
+            while (dr.Read())
+            {
+                isExist = true;
+
+                //word = nPt + word;
+                id = Int32.Parse(dr[0].ToString());
+                english = dr[2].ToString();
+                verb_vt = Int32.Parse(dr[8].ToString());
+                verb_give = Int32.Parse(dr[9].ToString());
+                verb_sich = Int32.Parse(dr[10].ToString());
+                verb_ppaux = Int32.Parse(dr[11].ToString());
+                verb_part = dr[12].ToString();
+                verb_present_trans = dr[13].ToString();
+                verb_prog = dr[14].ToString();
+                verb_pp = dr[15].ToString();
+                verb_past = dr[16].ToString();
+                ori_word = (dr[19].ToString() == "" ? dr[1].ToString() : dr[19].ToString());
+            }
+            dr.Close();
+            dr.Dispose();
+            cmd.Dispose();
+            
+            return isExist;
+        }
+
+        public void setVerbPart(int nID, String nEng, String nOri, int nPOS, String nPOSdt, int nNcase)
+        {
+            id = nID;
+            english = nEng;
+            ori_word = nOri;
+            pos = nPOS;
+            pos_dt = nPOSdt;
+            n_case = nNcase;
+        }
+
         private Words addOption(Words w, SqlDataReader dr)
         {
             w.id = Int32.Parse(dr[0].ToString());
@@ -753,6 +800,14 @@ namespace german_recommend_program
             
         }
 
+        public int ID
+        {
+            get
+            {
+                return id;
+            }
+        }
+
         public int POS
         {
             get{
@@ -776,11 +831,23 @@ namespace german_recommend_program
             }
         }
 
+        public String English
+        {
+            get
+            {
+                return english;
+            }
+        }
+
         public String Ori_word
         {
             set
             {
                 ori_word = value;
+            }
+            get
+            {
+                return ori_word;
             }
         }
 
@@ -810,6 +877,18 @@ namespace german_recommend_program
                 isCheck = value;
             }
         }
+        
+        public Boolean IsFinished
+        {
+            set
+            {
+                isFinished = value;
+            }
+            get
+            {
+                return isFinished;
+            }
+        }
 
         public int Pron_type
         {
@@ -824,6 +903,14 @@ namespace german_recommend_program
             get
             {
                 return conj_type;
+            }
+        }
+
+        public String Marks
+        {
+            get
+            {
+                return marks;
             }
         }
 

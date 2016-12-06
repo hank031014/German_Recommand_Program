@@ -10,18 +10,27 @@ namespace german_recommend_program
 {
     class GrammarRules : Object
     {
+        enum MainRole { M, S, UZ, D };
         enum Role { M_C, M_F, M_S, M_V1, M_V2, M_O1, M_O2, M_P, // main sentence
                     S_C, S_F, S_S, S_V1, S_V2, S_O1, S_02, S_P, // sub sentence
                     UZ_U, UZ_O1, UZ_O2, UZ_P, UZ_Z, UZ_V, // Um...zu or Damit sentence
                     D_D, D_S, D_V1, D_V2, D_O1, D_O2, D_P }; // dass sentence
 
         private String[] no_init_query = { "der", "die", "das", "des", "dem", "den", "ein", "eine", "eines", "einem", "einen", "einer", "kein", "keine", "keines", "keinem", "keinen", "keiner" };
-        
+        private String[] pos1_verb = { "haben", "sein", "werden", "können", "sollen", "wollen", "dürfen", "möchten", "müssen", "mögen" };
+        private String[] part = { "wiederan", "wiederauf", "wiederaus", "wiederein", "wiederzu", "ineinander",
+                                "gegenüber", "spazieren", "stehen", "bekannt", "zusammen", "herunter", "herbei", "herab", "heraus", 
+                                "heran", "herein", "hervor", "herum", "hinauf", "hinaus", "hinein", "hinterher", "hinüber", "hinuter",
+                                "hinzu", "fernüber", "zurück", "nieder", "offen", "sicher", "zuvor", "gleich", "davon", "dazu", 
+                                "durch", "gegen", "empor", "weiter", "hinzu", "wieder", "rüber", "still", "voran", "voraus", "vorbei",
+                                "vorein", "vorher", "vorüber", "kennen", "warm", "hoch", "fort", "voll", "kopf", "teil", "über", 
+                                "fern", "fest", "frei", "mich", "nach", "rück", "weg", "dar", "hin", "mit", "los", "ein", "aus",
+                                "auf", "vor", "bei", "zu", "an", "ab", "um" };
+
         private List<Words> stack, setz;
         private Hashtable st_element;
-
-        private int[] S_rule = { 1, 4, 2 };
-        private int state;
+        
+        private int state, mainState;
 
         private int subj, aux, v, obj1, obj2, sich, give, subs;
 
@@ -51,13 +60,16 @@ namespace german_recommend_program
 
         private void firstWord()
         {
+            setz[0].IsFinished = true;
             switch (setz[0].POS)
             {
                 case 1:
                     state = (int)Role.M_S;
+                    mainState = (int)MainRole.M;
                     break;
                 case 2:
                     state = (int)Role.M_S;
+                    mainState = (int)MainRole.M;
                     if (setz[0].POS_dt == "n_s")
                     {
                         st_element.Add("M_subject", 5);
@@ -69,21 +81,25 @@ namespace german_recommend_program
                     break;
                 case 3:
                     state = (int)Role.M_V1;
+                    mainState = (int)MainRole.M;
+                    vPosOneCheck(0);
                     st_element.Add("M_V1", 0);
                     break;
                 case 4:
                     state = (int)Role.M_S;
-                    
+                    mainState = (int)MainRole.M;
                     break;
                 case 5:
                     if (setz[0].Conj_type == 1)
                     {
                         state = (int)Role.M_C;
+                        mainState = (int)MainRole.M;
                         st_element.Add("M_conj", 0);
                     }
                     if (setz[0].Conj_type == 2)
                     {
                         state = (int)Role.S_C;
+                        mainState = (int)MainRole.S;
                         st_element.Add("S_conj", 0);
                     }    
                     break;
@@ -97,15 +113,18 @@ namespace german_recommend_program
                     if (setz[0].N_case == 1)
                     {
                         state = (int)Role.M_S;
+                        mainState = (int)MainRole.M;
                         st_element.Add("M_subject", setz[0].Pron_type);
                     }
                     if (setz[0].N_case == 2)
                     {
                         state = (int)Role.M_S;
+                        mainState = (int)MainRole.M;
                     }
                     else
                     {
                         state = (int)Role.M_F;
+                        mainState = (int)MainRole.M;
                     }
                     break;
                 default:
@@ -116,7 +135,14 @@ namespace german_recommend_program
 
         private void stBody(int cur)
         {
-            
+            if (setz[cur].IsFinished)
+            {
+                return;
+            }
+            else
+            {
+                setz[cur].IsFinished = true;
+            }
             switch (setz[cur].POS)
             {
                 case 1:
@@ -136,12 +162,18 @@ namespace german_recommend_program
                     }
                     break;
                 case 2:
-                    state = (int)Role.M_S;
+                    //state = (int)Role.M_S;
+                    
                     break;
                 case 3:
                     if (state.Equals((int)Role.M_F) || state.Equals((int)Role.M_C))
                     {
                         state = (int)Role.M_V1;
+                        if (mainState == (int)MainRole.M && !st_element.ContainsKey("M_V1"))
+                        {
+                            vPosOneCheck(cur);
+                            st_element.Add("M_V1", cur);
+                        }
                     }
                     if (state.Equals((int)Role.M_S))
                     {
@@ -152,6 +184,11 @@ namespace german_recommend_program
                                 if (setz[cur].POS_dt.EndsWith("_s3") || setz[cur].POS_dt.EndsWith("_s"))
                                 {
                                     state = (int)Role.M_V1;
+                                    if (mainState == (int)MainRole.M && !st_element.ContainsKey("M_V1"))
+                                    {
+                                        vPosOneCheck(cur);
+                                        st_element.Add("M_V1", cur);
+                                    }
                                 }
                                 else
                                 {
@@ -163,10 +200,34 @@ namespace german_recommend_program
                                 if (setz[cur].POS_dt.EndsWith("_pl"))
                                 {
                                     state = (int)Role.M_V1;
+                                    if (mainState == (int)MainRole.M && !st_element.ContainsKey("M_V1"))
+                                    {
+                                        vPosOneCheck(cur);
+                                        st_element.Add("M_V1", cur);
+                                    }
                                 }
                                 else
                                 {
                                     setz[cur].IsCheck = false;
+                                }
+                            }
+                        }
+                    }
+                    if (pos1_verb.Any(verb => verb == setz[cur].Ori_word))
+                    {
+                        int next = cur;
+                        while(next < setz.Count){
+                            if (setz[next].POS != 3)
+                            {
+                                next++;
+                            }
+                            else
+                            {
+                                if (mainState == (int)MainRole.M && !st_element.ContainsKey("M_V2") && setz[next].Marks != String.Empty)
+                                {
+                                    st_element.Add("M_V2", next);
+                                    Debug.WriteLine("M_V2");
+                                    break;
                                 }
                             }
                         }
@@ -211,68 +272,118 @@ namespace german_recommend_program
                     }
                     if (state.Equals((int)Role.M_V1))
                     {
-                        //Debug.WriteLine("pt: " + setz[cur].Pron_type);
-                        switch ((int)setz[cur].Pron_type)
+                        if (!st_element.ContainsKey("M_Subject"))
                         {
-                            
-                            case 1:
-                                st_element.Add("M_subject", 1);
-                                if (!setz[(int)st_element["M_V1"]].POS_dt.EndsWith("_sm"))
+                            switch ((int)setz[cur].Pron_type)
+                            {
+
+                                case 1:
+                                    st_element.Add("M_subject", 1);
+                                    if (!setz[(int)st_element["M_V1"]].POS_dt.EndsWith("_sm"))
+                                    {
+                                        setz[(int)st_element["M_V1"]].IsCheck = false;
+                                    }
+                                    break;
+                                case 2:
+                                    st_element.Add("M_subject", 2);
+                                    if (!setz[(int)st_element["M_V1"]].POS_dt.EndsWith("_pl"))
+                                    {
+                                        setz[(int)st_element["M_V1"]].IsCheck = false;
+                                    }
+                                    break;
+                                case 3:
+                                    st_element.Add("M_subject", 3);
+                                    if (!setz[(int)st_element["M_V1"]].POS_dt.EndsWith("_y2"))
+                                    {
+                                        setz[(int)st_element["M_V1"]].IsCheck = false;
+                                    }
+                                    break;
+                                case 4:
+                                    st_element.Add("M_subject", 4);
+                                    if (!setz[(int)st_element["M_V1"]].POS_dt.EndsWith("_y2"))
+                                    {
+                                        setz[(int)st_element["M_V1"]].IsCheck = false;
+                                    }
+                                    break;
+                                case 5:
+                                    st_element.Add("M_subject", 5);
+                                    if (!setz[(int)st_element["M_V1"]].POS_dt.EndsWith("_s3"))
+                                    {
+                                        setz[(int)st_element["M_V1"]].IsCheck = false;
+                                    }
+                                    break;
+                                case 6:
+                                    st_element.Add("M_subject", 6);
+                                    if (!setz[(int)st_element["M_V1"]].POS_dt.EndsWith("_pl"))
+                                    {
+                                        setz[(int)st_element["M_V1"]].IsCheck = false;
+                                    }
+                                    break;
+                                case 7:
+                                    st_element.Add("M_subject", 7);
+                                    if (!setz[(int)st_element["M_V1"]].POS_dt.EndsWith("_pl"))
+                                    {
+                                        setz[(int)st_element["M_V1"]].IsCheck = false;
+                                    }
+                                    break;
+                                default:
+                                    Debug.WriteLine("!!!");
+                                    break;
+                            }
+                        }
+                        //Debug.WriteLine("pt: " + setz[cur].Pron_type);
+                        else
+                        {
+                            if (mainState.Equals((int)MainRole.M))
+                            {
+                                if (st_element.ContainsKey("M_V2"))
                                 {
-                                    setz[(int)st_element["M_V1"]].IsCheck = false;
+
                                 }
-                                break;
-                            case 2:
-                                st_element.Add("M_subject", 2);
-                                if (!setz[(int)st_element["M_V1"]].POS_dt.EndsWith("_pl"))
+                                else if (!st_element.ContainsKey("M_V2") && st_element.ContainsKey("M_V1"))
                                 {
-                                    setz[(int)st_element["M_V1"]].IsCheck = false;
+
                                 }
-                                break;
-                            case 3:
-                                st_element.Add("M_subject", 3);
-                                if (!setz[(int)st_element["M_V1"]].POS_dt.EndsWith("_y2"))
-                                {
-                                    setz[(int)st_element["M_V1"]].IsCheck = false;
-                                }
-                                break;
-                            case 4:
-                                st_element.Add("M_subject", 4);
-                                if (!setz[(int)st_element["M_V1"]].POS_dt.EndsWith("_y2"))
-                                {
-                                    setz[(int)st_element["M_V1"]].IsCheck = false;
-                                }
-                                break;
-                            case 5:
-                                st_element.Add("M_subject", 5);
-                                if (!setz[(int)st_element["M_V1"]].POS_dt.EndsWith("_s3"))
-                                {
-                                    setz[(int)st_element["M_V1"]].IsCheck = false;
-                                }
-                                break;
-                            case 6:
-                                st_element.Add("M_subject", 6);
-                                if (!setz[(int)st_element["M_V1"]].POS_dt.EndsWith("_pl"))
-                                {
-                                    setz[(int)st_element["M_V1"]].IsCheck = false;
-                                }
-                                break;
-                            case 7:
-                                st_element.Add("M_subject", 7);
-                                if (!setz[(int)st_element["M_V1"]].POS_dt.EndsWith("_pl"))
-                                {
-                                    setz[(int)st_element["M_V1"]].IsCheck = false;
-                                }
-                                break;
-                            default:
-                                Debug.WriteLine("!!!");
-                                break;
+                            }
                         }
                     }
                     break;
                 default:
                     setz[cur].IsCheck = false;
                     break;
+            }
+        }
+
+        private void vPosOneCheck(int cur)
+        {
+            int next = cur;
+            String pt = String.Empty;
+            while (next < setz.Count)
+            {
+                //Debug.WriteLine("YEE");
+                if (setz[next].Marks.Equals(String.Empty))
+                {
+                    next++;
+                }
+                else
+                {
+                    if (part.Any(p => p.Equals(setz[next].Text)))
+                    {
+                        pt = setz[next].Text;
+                        Boolean isPart = setz[cur].partVerbSearch(pt);
+                        if (isPart)
+                        {
+                            setz[next].setVerbPart(setz[cur].ID, setz[cur].English, setz[cur].Ori_word, setz[cur].POS, setz[cur].POS_dt, setz[cur].N_case);
+                            setz[next].IsFinished = true;
+                        }
+                        else
+                        {
+                            setz[next].IsCheck = false;
+                            setz[next].IsFinished = true;
+                        }
+                    }
+                    break;
+                }
             }
         }
 
