@@ -357,13 +357,13 @@ namespace german_recommend_program
                         }
                         break;
                     case 2:
-                        if (word == ori_word)
+                        if (word == ori_word || (word == ori_word && word == noun_pural))
                         {
                             n_case = 1;
                             pron_type = 5;
                             pos_dt = "n_s";
                         }
-                        if (word == noun_pural)
+                        if (word == noun_pural && word != ori_word)
                         {
                             n_case = 1;
                             pron_type = 6;
@@ -868,6 +868,22 @@ namespace german_recommend_program
             {
                 return n_case;
             }
+            set
+            {
+                n_case = value;
+            }
+        }
+
+        public int Gender
+        {
+            get
+            {
+                return noun_gender;
+            }
+            set
+            {
+                noun_gender = value;
+            }
         }
 
         public Boolean IsCheck
@@ -911,6 +927,14 @@ namespace german_recommend_program
             get
             {
                 return marks;
+            }
+        }
+
+        public int Prep_type
+        {
+            get
+            {
+                return prep_type;
             }
         }
 

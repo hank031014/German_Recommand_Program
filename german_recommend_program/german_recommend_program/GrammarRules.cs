@@ -27,6 +27,16 @@ namespace german_recommend_program
                                 "fern", "fest", "frei", "mich", "nach", "rück", "weg", "dar", "hin", "mit", "los", "ein", "aus",
                                 "auf", "vor", "bei", "zu", "an", "ab", "um" };
 
+        private String[,] d_art = { { "der", "des", "dem", "den" }, 
+                                    { "die", "der", "der", "die" },
+                                    { "das", "des", "dem", "das" },
+                                    { "die", "der", "den", "die" } };
+        private String[,] ek_art = { { "", "es", "em", "en" }, 
+                                     { "e", "er", "er", "e" },
+                                     { "", "es", "em", "" },
+                                     { "e", "er", "en", "e" } };
+        private String[] pron_gen = { "mein", "dein", "ihr", "sein", "unser", "unsr", "euer", "eur" };
+
         private List<Words> stack, setz;
         private Hashtable st_element;
         
@@ -66,6 +76,7 @@ namespace german_recommend_program
                 case 1:
                     state = (int)Role.M_S;
                     mainState = (int)MainRole.M;
+                    artNounCheck(0);
                     break;
                 case 2:
                     state = (int)Role.M_S;
@@ -160,6 +171,10 @@ namespace german_recommend_program
                             setz[cur].IsCheck = false;
                         }
                     }
+                    else
+                    {
+                        artNounCheck(cur);
+                    }
                     break;
                 case 2:
                     //state = (int)Role.M_S;
@@ -193,6 +208,7 @@ namespace german_recommend_program
                                 else
                                 {
                                     setz[cur].IsCheck = false;
+                                    Debug.WriteLine("W1");
                                 }
                             }
                             if (setz[cur - 1].Pron_type == 6)
@@ -209,26 +225,33 @@ namespace german_recommend_program
                                 else
                                 {
                                     setz[cur].IsCheck = false;
+                                    Debug.WriteLine("W2");
                                 }
                             }
                         }
                     }
                     if (pos1_verb.Any(verb => verb == setz[cur].Ori_word))
                     {
-                        int next = cur;
+                        int next = cur + 1;
                         while(next < setz.Count){
-                            if (setz[next].POS != 3)
+                            if (setz[next].Marks == String.Empty)
                             {
+                                if (setz[next].POS == 3)
+                                {
+                                    setz[next].IsCheck = false;
+                                    setz[next].IsFinished = true;
+                                }
                                 next++;
                             }
                             else
                             {
-                                if (mainState == (int)MainRole.M && !st_element.ContainsKey("M_V2") && setz[next].Marks != String.Empty)
+                                if (mainState == (int)MainRole.M && !st_element.ContainsKey("M_V2") && setz[next].Marks != String.Empty && setz[next].POS == 3)
                                 {
                                     st_element.Add("M_V2", next);
                                     Debug.WriteLine("M_V2");
-                                    break;
+                                    
                                 }
+                                break;
                             }
                         }
                     }
@@ -246,10 +269,14 @@ namespace german_recommend_program
                     state = (int)Role.M_F;
                     break;
                 case 8:
+                    
                     if (state.Equals((int)Role.M_S) || state.Equals((int)Role.S_S) || state.Equals((int)Role.D_S))
                     {
                         if(setz[(cur-1 <= 0 ? 0 : cur-1)].Text != "und" || setz[cur-1 <= 0 ? 0 : cur-1].Text != "oder"){
                             setz[cur].IsCheck = false;
+                        }
+                        else if(setz[cur].N_case == 2){
+                            setz[cur].IsCheck = true;
                         }
                         else
                         {
@@ -272,7 +299,7 @@ namespace german_recommend_program
                     }
                     if (state.Equals((int)Role.M_V1))
                     {
-                        if (!st_element.ContainsKey("M_Subject"))
+                        if (!st_element.ContainsKey("M_subject"))
                         {
                             switch ((int)setz[cur].Pron_type)
                             {
@@ -334,6 +361,11 @@ namespace german_recommend_program
                         //Debug.WriteLine("pt: " + setz[cur].Pron_type);
                         else
                         {
+                            if (setz[cur].N_case == 2 || pron_gen.Any(p => setz[cur].Text.ToLower().StartsWith(p)))
+                            {
+                                Debug.WriteLine("go");
+                                artNounCheck(cur);
+                            }
                             if (mainState.Equals((int)MainRole.M))
                             {
                                 if (st_element.ContainsKey("M_V2"))
@@ -346,6 +378,11 @@ namespace german_recommend_program
                                 }
                             }
                         }
+                    }
+                    if (setz[cur].N_case == 2 || pron_gen.Any(p => setz[cur].Text.ToLower().StartsWith(p)))
+                    {
+                        Debug.WriteLine("go");
+                        artNounCheck(cur);
                     }
                     break;
                 default:
@@ -384,6 +421,345 @@ namespace german_recommend_program
                     }
                     break;
                 }
+            }
+        }
+
+        private void artNounCheck(int Cur, int Ncase = 1)
+        {
+            int cur = Cur;
+            int ncase = Ncase;
+            int next = cur + 1;
+
+            if (setz[cur].POS == 1 && Ncase != 2 && setz[cur].Text.EndsWith("es"))
+            {
+                setz[cur].N_case = 2;
+            }
+            while (next < setz.Count)
+            {
+                if (setz[next].POS != 2 || setz[next].POS == 4)
+                {
+                    if (setz[next].POS == 3)
+                    {
+                        String txt = setz[cur].Text.ToLower();
+                        int gender = 1;
+                        switch(txt){
+                            case "der":
+                                gender = 1;
+                                break;
+                            case "die":
+                                gender = 2;
+                                break;
+                            case "das":
+                                gender = 3;
+                                break;
+                        }
+                        addNounRole(1, gender, cur);
+                    }
+                    break;
+                }
+                if (setz[next].POS == 2)
+                {
+                    int nc = setz[next].N_case;
+                    int gender = setz[next].Gender;
+                    String art = setz[cur].Text.ToLower();
+                    
+                    if (art.StartsWith("d"))
+                    {
+                        //Debug.WriteLine(nc + ", " + gender);
+                        if(art.Equals(d_art[gender - 1, nc - 1])){
+                            setz[cur].N_case = nc;
+                            setz[cur].Gender = gender;
+                            addNounRole(nc, gender, next);
+                            //Debug.WriteLine("ddd");
+                        }
+                        else if (art.Equals(d_art[0, 1]) && setz[next].Gender == 1 && cur - 1 >= 0)
+                        {
+                            if (setz[cur - 1].POS == 2 || setz[cur - 1].Prep_type == 4)
+                            {
+                                setz[next].N_case = 2;
+                                setz[next].IsFinished = true;
+                            }
+                            else
+                            {
+                                setz[cur].IsCheck = false;
+                            }
+                            
+                        }
+                        else if (art.Equals(d_art[1, 1]) && setz[next].Gender == 2 && cur - 1 >= 0)
+                        {
+                            if (setz[cur - 1].POS == 2 || setz[cur - 1].Prep_type == 4)
+                            {
+                                setz[next].N_case = 2;
+                                setz[next].IsFinished = true;
+                            }
+                            else
+                            {
+                                setz[cur].IsCheck = false;
+                            }
+                        }
+                        else if (art.Equals(d_art[2, 1]) && setz[next].Gender == 3 && cur - 1 >= 0)
+                        {
+                            if (setz[cur - 1].POS == 2 || setz[cur - 1].Prep_type == 4)
+                            {
+                                setz[next].N_case = 2;
+                                setz[next].IsFinished = true;
+                            }
+                            else
+                            {
+                                setz[cur].IsCheck = false;
+                            }
+                        }
+                        else if (art.Equals(d_art[3, 1]) && setz[next].Gender == 4 && cur - 1 >= 0)
+                        {
+                            if (setz[cur - 1].POS == 2 || setz[cur - 1].Prep_type == 4)
+                            {
+                                setz[next].N_case = 2;
+                                setz[next].IsFinished = true;
+                            }
+                            else
+                            {
+                                setz[cur].IsCheck = false;
+                            }
+                        }
+                        else
+                        {
+                            setz[cur].IsCheck = false;
+                        }
+                    }
+
+                    if (art.StartsWith("ein"))
+                    {
+                        if (art.Equals("ein" + ek_art[gender - 1, nc - 1]))
+                        {
+                            setz[cur].N_case = nc;
+                            setz[cur].Gender = gender;
+                            addNounRole(nc, gender, next);
+                        }
+                        else if (art.Equals("ein" + ek_art[0, 1]) && setz[next].Gender == 1 && cur - 1 >= 0)
+                        {
+                            if (setz[cur - 1].POS == 2 || setz[cur - 1].Prep_type == 4)
+                            {
+                                setz[next].N_case = 2;
+                                setz[next].IsFinished = true;
+                            }
+                            else
+                            {
+                                setz[cur].IsCheck = false;
+                            }
+
+                        }
+                        else if (art.Equals("ein" + ek_art[1, 1]) && setz[next].Gender == 2 && cur - 1 >= 0)
+                        {
+                            if (setz[cur - 1].POS == 2 || setz[cur - 1].Prep_type == 4)
+                            {
+                                setz[next].N_case = 2;
+                                setz[next].IsFinished = true;
+                            }
+                            else
+                            {
+                                setz[cur].IsCheck = false;
+                            }
+                        }
+                        else if (art.Equals("ein" + ek_art[2, 1]) && setz[next].Gender == 3 && cur - 1 >= 0)
+                        {
+                            if (setz[cur - 1].POS == 2 || setz[cur - 1].Prep_type == 4)
+                            {
+                                setz[next].N_case = 2;
+                                setz[next].IsFinished = true;
+                            }
+                            else
+                            {
+                                setz[cur].IsCheck = false;
+                            }
+                        }
+                        else
+                        {
+                            setz[cur].IsCheck = false;
+                        }
+                    }
+                    if (art.StartsWith("kein"))
+                    {
+                        if (art.Equals("kein" + ek_art[gender - 1, nc - 1]))
+                        {
+                            setz[cur].N_case = nc;
+                            setz[cur].Gender = gender;
+                            addNounRole(nc, gender, next);
+                        }
+                        else if (art.Equals("kein" + ek_art[0, 1]) && setz[next].Gender == 1 && cur - 1 >= 0)
+                        {
+                            if (setz[cur - 1].POS == 2 || setz[cur - 1].Prep_type == 4)
+                            {
+                                setz[next].N_case = 2;
+                                setz[next].IsFinished = true;
+                            }
+                            else
+                            {
+                                setz[cur].IsCheck = false;
+                            }
+                        }
+                        else if (art.Equals("kein" + ek_art[1, 1]) && setz[next].Gender == 2 && cur - 1 >= 0)
+                        {
+                            if (setz[cur - 1].POS == 2 || setz[cur - 1].Prep_type == 4)
+                            {
+                                setz[next].N_case = 2;
+                                setz[next].IsFinished = true;
+                            }
+                            else
+                            {
+                                setz[cur].IsCheck = false;
+                            }
+                        }
+                        else if (art.Equals("kein" + ek_art[2, 1]) && setz[next].Gender == 3 && cur - 1 >= 0)
+                        {
+                            if (setz[cur - 1].POS == 2 || setz[cur - 1].Prep_type == 4)
+                            {
+                                setz[next].N_case = 2;
+                                setz[next].IsFinished = true;
+                            }
+                            else
+                            {
+                                setz[cur].IsCheck = false;
+                            }
+                        }
+                        else if (art.Equals("kein" + ek_art[3, 1]) && setz[next].Gender == 4 && cur - 1 >= 0)
+                        {
+                            if (setz[cur - 1].POS == 2 || setz[cur - 1].Prep_type == 4)
+                            {
+                                setz[next].N_case = 2;
+                                setz[next].IsFinished = true;
+                            }
+                            else
+                            {
+                                setz[cur].IsCheck = false;
+                            }
+                        }
+                        else
+                        {
+                            setz[cur].IsCheck = false;
+                        }
+                    }
+
+                    if (pron_gen.Any(g => art.StartsWith(g)))
+                    {
+                        String match = Array.Find(pron_gen, g => art.StartsWith(g));
+                        Debug.WriteLine(match + ek_art[gender - 1, nc - 1]);
+                        if (art.Equals(match + ek_art[gender - 1, nc - 1]))
+                        {
+                            setz[cur].IsCheck = true;
+                            setz[cur].N_case = nc;
+                            setz[cur].Gender = gender;
+                            addNounRole(nc, gender, next);
+                        }
+                        else if (art.Equals(match + ek_art[0, 1]) && setz[next].Gender == 1 && cur - 1 >= 0)
+                        {
+                            if (setz[cur - 1].POS == 2 || setz[cur - 1].Prep_type == 4)
+                            {
+                                setz[cur].IsCheck = true;
+                                setz[next].N_case = 2;
+                                setz[next].IsFinished = true;
+                                //Debug.WriteLine("ppp2");
+                            }
+                            else
+                            {
+                                setz[cur].IsCheck = false;
+                                //Debug.WriteLine("ppp1");
+                            }
+                        }
+                        else if (art.Equals(match + ek_art[1, 1]) && setz[next].Gender == 2 && cur - 1 >= 0)
+                        {
+                            if (setz[cur - 1].POS == 2 || setz[cur - 1].Prep_type == 4)
+                            {
+                                setz[cur].IsCheck = true;
+                                setz[next].N_case = 2;
+                                setz[next].IsFinished = true;
+                            }
+                            else
+                            {
+                                setz[cur].IsCheck = false;
+                            }
+                        }
+                        else if (art.Equals(match + ek_art[2, 1]) && setz[next].Gender == 3 && cur - 1 >= 0)
+                        {
+                            if (setz[cur - 1].POS == 2 || setz[cur - 1].Prep_type == 4)
+                            {
+                                setz[cur].IsCheck = true;
+                                setz[next].N_case = 2;
+                                setz[next].IsFinished = true;
+                            }
+                            else
+                            {
+                                setz[cur].IsCheck = false;
+                            }
+                        }
+                        else if (art.Equals(match + ek_art[3, 1]) && setz[next].Gender == 4 && cur - 1 >= 0)
+                        {
+                            if (setz[cur - 1].POS == 2 || setz[cur - 1].Prep_type == 4)
+                            {
+                                setz[cur].IsCheck = true;
+                                setz[next].N_case = 2;
+                                setz[next].IsFinished = true;
+                            }
+                            else
+                            {
+                                setz[cur].IsCheck = false;
+                            }
+                        }
+                        else
+                        {
+                            setz[cur].IsCheck = false;
+                            Debug.WriteLine("ppp");
+                        }
+                    }
+
+                    break;
+                }
+                
+                next++;
+            }
+        }
+
+        private void addNounRole(int nc, int gender, int next)
+        {
+            switch (nc)
+            {
+                case 1:
+                    if (mainState == (int)MainRole.M && !st_element.ContainsKey("M_subject"))
+                    {
+                        st_element.Add("M_subject", (gender == 4 ? 6 : 5));
+                    }
+                    else if (mainState == (int)MainRole.S && !st_element.ContainsKey("S_subject"))
+                    {
+                        st_element.Add("S_subject", (gender == 4 ? 6 : 5));
+                    }
+                    break;
+                case 3:
+                    if (mainState == (int)MainRole.M && !st_element.ContainsKey("M_O2"))
+                    {
+                        st_element.Add("M_O2", next);
+                    }
+                    else if (mainState == (int)MainRole.S && !st_element.ContainsKey("S_O2"))
+                    {
+                        st_element.Add("S_O2", next);
+                    }
+                    else if (mainState == (int)MainRole.UZ && !st_element.ContainsKey("UZ_O2"))
+                    {
+                        st_element.Add("UZ_O2", next);
+                    }
+                    break;
+                case 4:
+                    if (mainState == (int)MainRole.M && !st_element.ContainsKey("M_O1"))
+                    {
+                        st_element.Add("M_O1", next);
+                    }
+                    else if (mainState == (int)MainRole.S && !st_element.ContainsKey("S_O1"))
+                    {
+                        st_element.Add("S_O1", next);
+                    }
+                    else if (mainState == (int)MainRole.UZ && !st_element.ContainsKey("UZ_O1"))
+                    {
+                        st_element.Add("UZ_O1", next);
+                    }
+                    break;
             }
         }
 
