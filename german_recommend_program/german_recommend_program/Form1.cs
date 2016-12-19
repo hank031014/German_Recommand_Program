@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Data.SqlClient;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -15,6 +16,8 @@ namespace german_recommend_program
     {
         private SqlConnection db;
         private SentenceAnalyzer sentenceAnalyzer;
+        private ListBox lb;
+        private DictForm dform;
 
         public Form1()
         {
@@ -24,6 +27,7 @@ namespace german_recommend_program
         private void Form1_Load(object sender, EventArgs e)
         {
             ToolTip toolTip1 = new ToolTip();
+            lb = new ListBox();
             String cn = @"Data Source=140.116.154.85;" + "Database=german_project;" + "Uid=user;" + "Pwd=!ncku99!;";
 
             try
@@ -47,6 +51,9 @@ namespace german_recommend_program
             sentenceAnalyzer = new SentenceAnalyzer(this, db);
             writtentxb.Focus();
             writtentxb.TextChanged -= writtentxb_TextChanged;
+
+            listBox1.Items.Add("123");
+            listBox1.Items.Add("AAA");
         }
 
         private void writtentxb_TextChanged(object sender, EventArgs e)
@@ -73,7 +80,10 @@ namespace german_recommend_program
                 sentenceAnalyzer.modeChange(1);
                 btn_analyze.Visible = false;
                 btn_analyze.Enabled = false;
-                writtentxb.TextChanged += writtentxb_TextChanged;
+                //writtentxb.TextChanged += writtentxb_TextChanged;
+
+               
+
             }
             else
             {
@@ -96,6 +106,7 @@ namespace german_recommend_program
             String tmp = writtentxb.Text + "Ä";
             writtentxb.Text = tmp;
             writtentxb.Focus();
+            writtentxb.Select(writtentxb.Text.Length, 0);
         }
 
         private void btn_small_ae_Click(object sender, EventArgs e)
@@ -103,6 +114,7 @@ namespace german_recommend_program
             String tmp = writtentxb.Text + "ä";
             writtentxb.Text = tmp;
             writtentxb.Focus();
+            writtentxb.Select(writtentxb.Text.Length, 0);
         }
 
         private void btn_big_oe_Click(object sender, EventArgs e)
@@ -110,6 +122,7 @@ namespace german_recommend_program
             String tmp = writtentxb.Text + "Ö";
             writtentxb.Text = tmp;
             writtentxb.Focus();
+            writtentxb.Select(writtentxb.Text.Length, 0);
         }
 
         private void btn_small_oe_Click(object sender, EventArgs e)
@@ -117,6 +130,7 @@ namespace german_recommend_program
             String tmp = writtentxb.Text + "ö";
             writtentxb.Text = tmp;
             writtentxb.Focus();
+            writtentxb.Select(writtentxb.Text.Length, 0);
         }
 
         private void btn_big_ue_Click(object sender, EventArgs e)
@@ -124,6 +138,7 @@ namespace german_recommend_program
             String tmp = writtentxb.Text + "Ü";
             writtentxb.Text = tmp;
             writtentxb.Focus();
+            writtentxb.Select(writtentxb.Text.Length, 0);
         }
 
         private void btn_small_ue_Click(object sender, EventArgs e)
@@ -131,24 +146,33 @@ namespace german_recommend_program
             String tmp = writtentxb.Text + "ü";
             writtentxb.Text = tmp;
             writtentxb.Focus();
+            writtentxb.Select(writtentxb.Text.Length, 0);
         }
 
         private void btn_ss_Click(object sender, EventArgs e)
         {
             String tmp = writtentxb.Text + "ß";
             writtentxb.Text = tmp;
-            writtentxb.Focus();  
+            writtentxb.Focus();
+            writtentxb.Select(writtentxb.Text.Length, 0);
         }
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
             if (MessageBox.Show("您確定要離開嗎？", "Closing...", MessageBoxButtons.YesNo) == DialogResult.Yes)
             {
-                // Cancel the Closing event from closing the form.
+                if (dform != null)
+                {
+                    if (dform.Visible)
+                    {
+                        dform.Close();
+                        dform.Dispose();
+                        GC.SuppressFinalize(dform);
+                    }
+                }
                 db.Close();
                 db.Dispose();
-                e.Cancel = false;
-                // Call method to save file...
+                e.Cancel = false;               
             }
             else
             {
@@ -157,6 +181,41 @@ namespace german_recommend_program
             
         }
 
+        private void writtentxb_KeyUp(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.F1)
+            {
+                Point curPoint = writtentxb.GetPositionFromCharIndex(writtentxb.SelectionStart);
+                curPoint.Offset(writtentxb.Left, writtentxb.Top + writtentxb.Font.Height);
+
+                listBox1.Location = curPoint;
+                listBox1.Visible = true;
+                listBox1.BringToFront();
+                listBox1.Focus();
+                //listBox1.Visible = true;
+                Debug.WriteLine("cur point" + curPoint);
+            }
+            else
+                listBox1.Visible = false;
+        }
+
+        private void btn_dict_Click(object sender, EventArgs e)
+        {
+            if (dform == null)
+            {
+                dform = new DictForm(db);
+                dform.Show();
+            }
+            else if (dform.IsDisposed)
+            {
+                dform = null;
+                dform = new DictForm(db);
+                dform.Show();
+            }
+            
+        }
+
+        
 
 
 

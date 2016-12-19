@@ -26,6 +26,7 @@ namespace german_recommend_program
         private int conj_type, prep_type;
         private String ori_word;
         private int n_case, pron_type;
+        private String error_msg;
 
         private String pos_dt;
 
@@ -295,6 +296,7 @@ namespace german_recommend_program
                     else
                     {
                         isCheck = false;
+                        error_msg = "拼字可能有誤";
                     }
                     
                 }
@@ -615,9 +617,16 @@ namespace german_recommend_program
             Label wl = new Label();
             if (!isCheck)
             {
+                ToolTip ttp = new ToolTip();
+
                 wl.BackColor = Color.Red;
+                ttp.AutoPopDelay = 10000;
+                ttp.InitialDelay = 500;
+                ttp.ReshowDelay = 500;
+                ttp.ShowAlways = true;
+                ttp.SetToolTip(wl, error_msg);
             }
-            wl.Text = word + " (" + posText(pos) + ")";
+            wl.Text = word/* + " (" + posText(pos) + ")"*/;
             wl.AutoSize = true;
             wl.BorderStyle = BorderStyle.FixedSingle;
             wl.Font = new Font("Microsoft JhengHei", 12);
@@ -652,7 +661,7 @@ namespace german_recommend_program
             {
                 str += "\n名詞性別：" + noun_gender;
             }
-            str += "\n詞性(分析後)：" + pos_dt;
+            //str += "\n詞性(分析後)：" + pos_dt;
             str += "\n當前格位：" + nCaseText(n_case);
 
             MessageBox.Show(str, "資料庫單字讀取結果");          
@@ -730,12 +739,12 @@ namespace german_recommend_program
             return txt;
         }
 
-        public void chooseOption(int Gpos = 1, int Gn_case = 1)
+        public int chooseOption(int Gpos = 1, int Gn_case = 1)
         {
             if (options.Count == 0)
             {
                 isCheck = false;
-                return;
+                return 0;
             }
             for (int i = 0; i < options.Count; i++)
             {
@@ -764,7 +773,7 @@ namespace german_recommend_program
                     pron_type = options[i].pron_type;
 
                     options.RemoveAt(i);
-                    return;
+                    return 2;
                 }
             }
             for (int i = 0; i < options.Count; i++)
@@ -794,10 +803,10 @@ namespace german_recommend_program
                     prep_type = options[i].prep_type;
 
                     options.RemoveAt(i);
-                    return;
+                    return 1;
                 }
             }
-            
+            return 0;
         }
 
         public int ID
@@ -892,6 +901,10 @@ namespace german_recommend_program
             {
                 isCheck = value;
             }
+            get
+            {
+                return isCheck;
+            }
         }
         
         public Boolean IsFinished
@@ -935,6 +948,18 @@ namespace german_recommend_program
             get
             {
                 return prep_type;
+            }
+        }
+
+        public String Error_msg
+        {
+            get
+            {
+                return error_msg;
+            }
+            set
+            {
+                error_msg = value;
             }
         }
 

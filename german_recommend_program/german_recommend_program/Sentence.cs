@@ -111,6 +111,7 @@ namespace german_recommend_program
             for (int i = 0; i < word_stack.Count; i++)
             {
                 word_stack[i].word_add_label();
+                
             }
 
         }

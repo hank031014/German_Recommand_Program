@@ -65,6 +65,13 @@
     <Reference Include="WindowsFormsIntegration" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DictForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="DictForm.Designer.cs">
+      <DependentUpon>DictForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="DictWord.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -77,6 +84,9 @@
     <Compile Include="Sentence.cs" />
     <Compile Include="SentenceAnalyzer.cs" />
     <Compile Include="Words.cs" />
+    <EmbeddedResource Include="DictForm.resx">
+      <DependentUpon>DictForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
     </EmbeddedResource>

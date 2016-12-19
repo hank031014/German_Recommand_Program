@@ -29,7 +29,6 @@
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
-            this.writtentxb = new System.Windows.Forms.TextBox();
             this.btnSwitch = new System.Windows.Forms.CheckBox();
             this.btn_analyze = new System.Windows.Forms.Button();
             this.displayPanel = new System.Windows.Forms.FlowLayoutPanel();
@@ -42,14 +41,11 @@
             this.btn_small_ue = new System.Windows.Forms.Button();
             this.btn_ss = new System.Windows.Forms.Button();
             this.lb_de = new System.Windows.Forms.Label();
+            this.btn_dict = new System.Windows.Forms.Button();
+            this.listBox1 = new System.Windows.Forms.ListBox();
+            this.writtentxb = new System.Windows.Forms.RichTextBox();
             this.flowLayoutPanel1.SuspendLayout();
             this.SuspendLayout();
-            // 
-            // writtentxb
-            // 
-            resources.ApplyResources(this.writtentxb, "writtentxb");
-            this.writtentxb.Name = "writtentxb";
-            this.writtentxb.TextChanged += new System.EventHandler(this.writtentxb_TextChanged);
             // 
             // btnSwitch
             // 
@@ -140,16 +136,37 @@
             resources.ApplyResources(this.lb_de, "lb_de");
             this.lb_de.Name = "lb_de";
             // 
+            // btn_dict
+            // 
+            resources.ApplyResources(this.btn_dict, "btn_dict");
+            this.btn_dict.Name = "btn_dict";
+            this.btn_dict.UseVisualStyleBackColor = true;
+            this.btn_dict.Click += new System.EventHandler(this.btn_dict_Click);
+            // 
+            // listBox1
+            // 
+            this.listBox1.FormattingEnabled = true;
+            resources.ApplyResources(this.listBox1, "listBox1");
+            this.listBox1.Name = "listBox1";
+            // 
+            // writtentxb
+            // 
+            resources.ApplyResources(this.writtentxb, "writtentxb");
+            this.writtentxb.Name = "writtentxb";
+            this.writtentxb.KeyUp += new System.Windows.Forms.KeyEventHandler(this.writtentxb_KeyUp);
+            // 
             // Form1
             // 
             resources.ApplyResources(this, "$this");
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.Controls.Add(this.writtentxb);
+            this.Controls.Add(this.listBox1);
+            this.Controls.Add(this.btn_dict);
             this.Controls.Add(this.lb_de);
             this.Controls.Add(this.flowLayoutPanel1);
             this.Controls.Add(this.displayPanel);
             this.Controls.Add(this.btn_analyze);
             this.Controls.Add(this.btnSwitch);
-            this.Controls.Add(this.writtentxb);
             this.Name = "Form1";
             this.Tag = "";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
@@ -162,7 +179,6 @@
 
         #endregion
 
-        private System.Windows.Forms.TextBox writtentxb;
         private System.Windows.Forms.CheckBox btnSwitch;
         private System.Windows.Forms.Button btn_analyze;
         private System.Windows.Forms.FlowLayoutPanel displayPanel;
@@ -175,6 +191,9 @@
         private System.Windows.Forms.Button btn_small_ue;
         private System.Windows.Forms.Button btn_ss;
         private System.Windows.Forms.Label lb_de;
+        private System.Windows.Forms.Button btn_dict;
+        private System.Windows.Forms.ListBox listBox1;
+        private System.Windows.Forms.RichTextBox writtentxb;
     }
 }
 
