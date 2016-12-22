@@ -44,6 +44,7 @@
             this.btn_dict = new System.Windows.Forms.Button();
             this.listBox1 = new System.Windows.Forms.ListBox();
             this.writtentxb = new System.Windows.Forms.RichTextBox();
+            this.btn_about = new System.Windows.Forms.Button();
             this.flowLayoutPanel1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -155,10 +156,18 @@
             this.writtentxb.Name = "writtentxb";
             this.writtentxb.KeyUp += new System.Windows.Forms.KeyEventHandler(this.writtentxb_KeyUp);
             // 
+            // btn_about
+            // 
+            resources.ApplyResources(this.btn_about, "btn_about");
+            this.btn_about.Name = "btn_about";
+            this.btn_about.UseVisualStyleBackColor = true;
+            this.btn_about.Click += new System.EventHandler(this.btn_about_Click);
+            // 
             // Form1
             // 
             resources.ApplyResources(this, "$this");
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.Controls.Add(this.btn_about);
             this.Controls.Add(this.writtentxb);
             this.Controls.Add(this.listBox1);
             this.Controls.Add(this.btn_dict);
@@ -194,6 +203,7 @@
         private System.Windows.Forms.Button btn_dict;
         private System.Windows.Forms.ListBox listBox1;
         private System.Windows.Forms.RichTextBox writtentxb;
+        private System.Windows.Forms.Button btn_about;
     }
 }
 

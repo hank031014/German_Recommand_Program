@@ -224,7 +224,7 @@ namespace german_recommend_program
         public String getVgive()
         {
             String ret = String.Empty;
-            switch (verb_ppaux)
+            switch (verb_give)
             {
                 case 0:
                     ret = "非動詞或不是";

@@ -935,6 +935,37 @@ namespace german_recommend_program
             }
         }
 
+        public int Verb_ppaux
+        {
+            get
+            {
+                return verb_ppaux;
+            }
+        }
+
+        public int Verb_sich
+        {
+            get
+            {
+                return verb_sich;
+            }
+        }
+
+        public int Verb_vt
+        {
+            get{
+                return verb_vt;
+            }
+        }
+
+        public int Verb_give
+        {
+            get
+            {
+                return verb_give;
+            }
+        }
+
         public String Marks
         {
             get

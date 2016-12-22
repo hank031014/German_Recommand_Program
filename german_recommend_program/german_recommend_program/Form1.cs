@@ -18,6 +18,7 @@ namespace german_recommend_program
         private SentenceAnalyzer sentenceAnalyzer;
         private ListBox lb;
         private DictForm dform;
+        private AboutForm aform;
 
         public Form1()
         {
@@ -170,6 +171,15 @@ namespace german_recommend_program
                         GC.SuppressFinalize(dform);
                     }
                 }
+                if (aform != null)
+                {
+                    if (aform.Visible)
+                    {
+                        aform.Close();
+                        aform.Dispose();
+                        GC.SuppressFinalize(aform);
+                    }
+                }
                 db.Close();
                 db.Dispose();
                 e.Cancel = false;               
@@ -213,6 +223,21 @@ namespace german_recommend_program
                 dform.Show();
             }
             
+        }
+
+        private void btn_about_Click(object sender, EventArgs e)
+        {
+            if (aform == null)
+            {
+                aform = new AboutForm();
+                aform.Show();
+            }
+            else if (aform.IsDisposed)
+            {
+                aform = null;
+                aform = new AboutForm();
+                aform.Show();
+            }
         }
 
         

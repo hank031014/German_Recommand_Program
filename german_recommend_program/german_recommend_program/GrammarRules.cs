@@ -49,6 +49,7 @@ namespace german_recommend_program
                                         { "e", "er", "er", "e" },
                                         { "es", "en", "em", "es" },
                                         { "e", "er", "en", "e" } };
+        private String[] sich_akk = { "mich", "uns", "dich", "euch", "sich", "sich", "sich" };
 
         private List<Words> stack, setz;
         private Hashtable st_element;
@@ -165,7 +166,13 @@ namespace german_recommend_program
                     {
                         state = (int)Role.M_S;
                         mainState = (int)MainRole.M;
-                        st_element.Add("M_subject", setz[0].Pron_type);
+                        if(setz[0].Pron_type == 0){
+                            st_element.Add("M_subject", 1);
+                        }
+                        else{
+                            st_element.Add("M_subject", setz[0].Pron_type);
+                        }
+                        
                     }
                     if (setz[0].N_case == 2)
                     {
@@ -223,7 +230,7 @@ namespace german_recommend_program
                     
                     break;
                 case 3:
-                    if (state.Equals((int)Role.M_F) || state.Equals((int)Role.M_C))
+                    if (mainState.Equals((int)MainRole.M))
                     {
                         state = (int)Role.M_V1;
                         if (mainState == (int)MainRole.M && !st_element.ContainsKey("M_V1"))
@@ -232,7 +239,7 @@ namespace german_recommend_program
                             st_element.Add("M_V1", cur);
                         }
                     }
-                    if (state.Equals((int)Role.M_S))
+                    if (mainState.Equals((int)MainRole.M))
                     {
                         if (!st_element.ContainsKey("M_subject") && setz[cur -1].POS == 1 && setz[cur - 1].N_case == 1)
                         {
@@ -300,30 +307,451 @@ namespace german_recommend_program
                             }
                         }
                     }
+                    if (mainState == (int)MainRole.M)
+                    {
+                        //Debug.WriteLine("Contains MV1?: {0}", st_element.ContainsKey("M_V1"));
+                        if (st_element.ContainsKey("M_V2") && st_element.ContainsKey("M_V1"))
+                        {
+                            Debug.WriteLine("MV1");
+                            int v2pos = (int)st_element["M_V2"];
+                            int v1pos = (int)st_element["M_V1"];
+                            if (setz[v2pos].Verb_sich == 1)
+                            {
+                                int sich_pos = v1pos + 1;
+                                if (setz[sich_pos].POS == 8)
+                                {
+                                    if (st_element.ContainsKey("M_subject"))
+                                    {
+                                        int stype = (int)st_element["M_subject"];
+                                        if (setz[sich_pos].Text != sich_akk[stype - 1])
+                                        {
+                                            setz[sich_pos].IsCheck = false;
+                                            setz[sich_pos].IsFinished = true;
+                                            setz[sich_pos].Error_msg = "此處要使用反身代名詞，請參考主詞";
+                                        }
+                                    }
+                                }
+                                else{
+                                    setz[sich_pos].IsCheck = false;
+                                    setz[sich_pos].IsFinished = true;
+                                    setz[sich_pos].Error_msg = "此處要使用反身代名詞";
+                                }
+                            }
+                        }
+                        else if (!st_element.ContainsKey("M_V2") && st_element.ContainsKey("M_V1"))
+                        { 
+                            int v1pos = (int)st_element["M_V1"];
+
+                            //Debug.WriteLine("give?: {0}", setz[v1pos].Verb_give);
+                            if (setz[v1pos].Text == "sein")
+                            {
+                                int next = v1pos + 1;
+                                if (next >= setz.Count)
+                                {
+                                    setz[v1pos].IsCheck = false;
+                                    setz[v1pos].Error_msg = "sein動詞之後應該出現代名詞、形容詞、名詞、介詞";
+                                }
+                                else
+                                {
+                                    if (setz[next].POS == 8 && setz[next].N_case == 3)
+                                    {
+                                        setz[next].IsFinished = true;
+                                        if (next + 1 >= setz.Count)
+                                        {
+                                            setz[v1pos].IsCheck = false;
+                                            setz[v1pos].Error_msg = "受詞之後缺少形容詞";
+                                        }
+                                        else if (setz[next + 1].POS == 4)
+                                        {
+                                            setz[next + 1].IsFinished = true;
+                                        }
+                                        else if (setz[next + 1].POS == 5 && setz[next + 2].POS == 4)
+                                        {
+                                            setz[next + 1].IsFinished = true;
+                                            setz[next + 2].IsFinished = true;
+                                        }
+                                        else
+                                        {
+                                            setz[v1pos].IsCheck = false;
+                                            setz[v1pos].Error_msg = "受詞之後缺少形容詞";
+                                        }
+                                    }
+                                    else if (setz[next].POS == 1)
+                                    {
+                                        int resp = artNounCheck(next);
+                                        if (resp == 1 || resp == 5)
+                                        {
+                                            setz[next].IsFinished = true;
+                                        }
+                                        else if (resp == 3)
+                                        {
+                                            int pos = next;
+                                            while (pos < setz.Count)
+                                            {
+                                                if (setz[pos].POS != 2)
+                                                {
+                                                    pos++;
+                                                }
+                                                else
+                                                {
+                                                    break;
+                                                }
+                                            }
+
+                                            if (next + 1 >= setz.Count)
+                                            {
+                                                setz[v1pos].IsCheck = false;
+                                                setz[v1pos].Error_msg = "受詞之後缺少形容詞";
+                                            } 
+                                            else if (setz[pos + 1].POS == 4)
+                                            {
+                                                setz[pos + 1].IsFinished = true;
+                                            }
+                                            else if (setz[pos + 1].POS == 5 && setz[pos + 2].POS == 4)
+                                            {
+                                                setz[pos + 1].IsFinished = true;
+                                                setz[pos + 2].IsFinished = true;
+                                            }
+                                            else
+                                            {
+                                                setz[v1pos].IsCheck = false;
+                                                setz[v1pos].Error_msg = "受詞之後缺少形容詞";
+                                            }
+                                        }
+                                        else
+                                        {
+                                            setz[v1pos].IsCheck = false;
+                                            setz[v1pos].Error_msg = "受詞格位有誤";
+                                        }
+                                    }
+                                    else if (setz[next].POS == 6)
+                                    {
+
+                                    }
+                                    else if (setz[next].POS == 4)
+                                    {
+                                        setz[next].IsFinished = true;
+                                    }
+                                    else if (setz[next].POS == 5 && setz[next + 1].POS == 4)
+                                    {
+                                        setz[next].IsFinished = true;
+                                        setz[next + 1].IsFinished = true;
+                                    }
+                                    else
+                                    {
+                                        setz[next].IsFinished = true;
+                                        setz[next].IsCheck = false;
+                                        setz[next].Error_msg = "sein動詞之後應該出現代名詞、形容詞、名詞、介詞等";
+                                    }
+                                }
+                                
+                            }
+                            else if (setz[v1pos].Verb_sich == 1)
+                            {
+                                int sich_pos = v1pos + 1;
+                                if (sich_pos >= setz.Count)
+                                {
+                                    setz[v1pos].IsCheck = false;
+                                    setz[v1pos].Error_msg = "缺少反身代名詞";
+                                }
+                                else if (setz[sich_pos].POS == 8)
+                                {
+                                    if (st_element.ContainsKey("M_subject"))
+                                    {
+                                        int stype = (int)st_element["M_subject"];
+                                        Debug.WriteLine("stype: {0}", stype);
+                                        if (setz[sich_pos].Text != sich_akk[stype - 1])
+                                        {
+                                            setz[sich_pos].IsCheck = false;
+                                            setz[sich_pos].IsFinished = true;
+                                            setz[sich_pos].Error_msg = "此處要使用反身代名詞，請參考主詞";
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    setz[sich_pos].IsCheck = false;
+                                    setz[sich_pos].IsFinished = true;
+                                    setz[sich_pos].Error_msg = "此處要使用反身代名詞";
+                                }
+
+                                if (setz[v1pos].Verb_vt == 2)
+                                {
+                                    int next = v1pos + 2;
+                                    if (next >= setz.Count)
+                                    {
+                                        setz[v1pos].IsCheck = false;
+                                        setz[v1pos].Error_msg = "缺少受詞";
+                                    }
+                                    else if (setz[next].POS == 8 && setz[next].N_case == 4)
+                                    {
+                                        setz[next].IsFinished = true;
+                                        
+                                    }
+                                    else if (setz[next].POS == 1)
+                                    {
+                                        int resp = artNounCheck(next, 4);
+                                        if (resp == 5)
+                                        {
+                                            setz[next].IsFinished = true;
+                                        }
+                                        else if (resp == 4)
+                                        {
+                                            
+                                        }
+                                        else
+                                        {
+                                            setz[v1pos].IsCheck = false;
+                                            setz[v1pos].Error_msg = "動詞之後沒有受詞";
+                                        }
+                                    }
+                                }
+                                else if (setz[v1pos].Verb_vt == 3)
+                                {
+                                    int next = v1pos + 2;
+                                    if (next >= setz.Count)
+                                    {
+                                        setz[v1pos].IsCheck = false;
+                                        setz[v1pos].Error_msg = "缺少與格受詞";
+                                    }
+                                    else if (setz[next].POS == 8 && setz[next].N_case == 3)
+                                    {
+                                        setz[next].IsFinished = true;
+
+                                    }
+                                    else if (setz[next].POS == 1)
+                                    {
+                                        int resp = artNounCheck(next, 3);
+                                        if (resp != 3)
+                                        {
+                                            setz[v1pos].IsCheck = false;
+                                            setz[v1pos].Error_msg = "動詞之後沒有與格受詞";
+                                        }
+                                    }
+                                }
+                                else if (setz[v1pos].Verb_vt == 1)
+                                {
+                                    int next = v1pos + 2;
+                                    if (next < setz.Count)
+                                    {
+                                        if (setz[next].POS == 1 || setz[next].POS == 2)
+                                        {
+                                            setz[next].IsCheck = false;
+                                            setz[next].Error_msg = "不及物動詞之後不能有受詞";
+                                        }
+                                    }
+                                    
+                                }
+                            }
+                            else if (setz[v1pos].Verb_give == 1)
+                            {
+                                Debug.WriteLine("give");
+                                int next = v1pos + 1;
+                                if (next >= setz.Count)
+                                {
+                                    setz[v1pos].IsCheck = false;
+                                    setz[v1pos].Error_msg = "動詞之後沒有受詞";
+                                }
+                                else
+                                {
+                                    Debug.WriteLine("give");
+                                    if (setz[next].POS == 8 && setz[next].N_case == 3)
+                                    {
+                                        Debug.WriteLine("give");
+                                        setz[next].IsFinished = true;
+                                        int next2 = next + 1;
+                                        if (next2 < setz.Count)
+                                        {
+                                            if (setz[next2].POS == 8 && setz[next2].N_case == 4)
+                                            {
+                                                setz[next2].IsCheck = false;
+                                                setz[next2].Error_msg = "若授予動詞後要使用兩個代名詞，賓格代名詞要至於前";
+                                            }
+                                            else if (setz[next2].POS == 8 && setz[next2].N_case == 3)
+                                            {
+                                                setz[next2].IsCheck = false;
+                                                setz[next2].Error_msg = "此受詞應為與格";
+                                            }
+                                            else if(setz[next2].POS == 1)
+                                            {
+                                                Debug.WriteLine("give");
+                                                int resp = artNounCheck(next2, 4);
+                                                if (resp == 5)
+                                                {
+                                                    setz[next2].IsFinished = true;
+                                                }
+                                                else if (resp == 4 || resp == 1)
+                                                {
+
+                                                }
+                                                else
+                                                {
+                                                    setz[next2].IsCheck = false;
+                                                    setz[next2].Error_msg = "此處應有第二個受詞";
+                                                }
+                                            }
+                                        }
+                                    }
+                                    else if (setz[next].POS == 8 && setz[next].N_case == 4)
+                                    {
+                                        setz[next].IsFinished = true;
+                                        int next2 = next + 1;
+                                        if (next2 < setz.Count)
+                                        {
+                                            if (setz[next2].POS == 8 && setz[next2].N_case == 4)
+                                            {
+                                                setz[next2].IsCheck = false;
+                                                setz[next2].Error_msg = "此受詞應為與格";
+                                            }
+                                            else if (setz[next2].POS == 1)
+                                            {
+                                                int resp = artNounCheck(next2, 3);
+                                                if (resp != 3){
+                                                    setz[next2].IsCheck = false;
+                                                    setz[next2].Error_msg = "此處應有第一個受詞";
+                                                }
+                                            }
+                                        }
+                                    }
+                                    else if (setz[next].POS == 1)
+                                    {
+                                        int resp = artNounCheck(next, 3);
+                                        if (resp != 3)
+                                        {
+                                            setz[next].IsCheck = false;
+                                            setz[next].Error_msg = "此處應有第一個受詞";
+
+                                        }
+                                        else
+                                        {
+                                            int next2 = next;
+                                            while (next2 < setz.Count)
+                                            {
+                                                if (setz[next].POS != 2)
+                                                {
+                                                    next2++;
+                                                }
+                                                else
+                                                {
+                                                    next2++;
+                                                    break;
+                                                }
+                                            }
+                                            if (next2 < setz.Count)
+                                            {
+                                                int resp2 = artNounCheck(next2, 4);
+                                                if (resp2 != 4)
+                                                {
+                                                    setz[next2].IsCheck = false;
+                                                    setz[next2].Error_msg = "此處應有第二個受詞";
+
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            else if (setz[v1pos].Verb_vt == 2)
+                            {
+                                int next = v1pos + 1;
+                                if (next >= setz.Count)
+                                {
+                                    setz[v1pos].IsCheck = false;
+                                    setz[v1pos].Error_msg = "動詞之後沒有受詞";
+                                }
+                                else
+                                {
+                                    if (setz[next].POS == 8 && setz[next].N_case == 4)
+                                    {
+                                        setz[next].IsFinished = true;
+
+                                    }
+                                    else if (setz[next].POS == 1)
+                                    {
+                                        int resp = artNounCheck(next, 4);
+                                        if (resp == 5)
+                                        {
+                                            setz[next].IsFinished = true;
+                                        }
+                                        else if (resp == 4 || resp == 1)
+                                        {
+
+                                        }
+                                        else
+                                        {
+                                            setz[v1pos].IsCheck = false;
+                                            setz[v1pos].Error_msg = "動詞之後沒有受詞";
+                                        }
+                                    }
+                                }
+                                
+                            }
+                            else if (setz[v1pos].Verb_vt == 3)
+                            {
+                                int next = v1pos + 1;
+                                if (next >= setz.Count)
+                                {
+                                    setz[v1pos].IsCheck = false;
+                                    setz[v1pos].Error_msg = "動詞之後沒有受詞";
+                                }
+                                else
+                                {
+                                    if (setz[next].POS == 8 && setz[next].N_case == 3)
+                                    {
+                                        setz[next].IsFinished = true;
+
+                                    }
+                                    else if (setz[next].POS == 1)
+                                    {
+                                        int resp = artNounCheck(next, 3);
+                                        if (resp != 3)
+                                        {
+                                            setz[v1pos].IsCheck = false;
+                                            setz[v1pos].Error_msg = "動詞之後沒有與格受詞";
+                                        }
+                                    }
+                                }
+                                
+                            }
+                            else if (setz[v1pos].Verb_vt == 1)
+                            {
+                                int next = v1pos + 1;
+                                if (next < setz.Count)
+                                {
+                                    if (setz[next].POS == 1 || setz[next].POS == 2)
+                                    {
+                                        setz[next].IsCheck = false;
+                                        setz[next].Error_msg = "不及物動詞之後不能有受詞";
+                                    }
+                                }
+                                
+                            }
+                        }
+                    }
                     break;
                 case 4:
-                    state = (int)Role.M_S;
-                    int next2 = cur + 1;
-                    while (next2 < setz.Count)
+                    //state = (int)Role.M_S;
+                    int next3 = cur + 1;
+                    while (next3 < setz.Count)
                     {
-                        if (setz[next2].POS == 4)
+                        if (setz[next3].POS == 4)
                         {
-                            next2++;
+                            next3++;
                         }
-                        else if (setz[next2].POS == 3)
+                        else if (setz[next3].POS == 3)
                         {
                             break;
                         }
-                        else if (setz[next2].POS == 2)
+                        else if (setz[next3].POS == 2)
                         {
-                            setz[next2].IsFinished = true;
-                            adjBeforeNounCheck(3, setz[next2].Gender, 4, cur - 1, next2);
+                            setz[next3].IsFinished = true;
+                            adjBeforeNounCheck(3, setz[next3].Gender, 4, cur - 1, next3);
                             break;
                         }
                         else
                         {
-                            setz[next2].IsCheck = false;
-                            setz[next2].Error_msg = "形容詞之後出現錯誤用法";
+                            setz[next3].IsCheck = false;
+                            setz[next3].Error_msg = "形容詞之後出現錯誤用法";
                             break;
                         }
                     }
@@ -504,11 +932,12 @@ namespace german_recommend_program
             }
         }
 
-        private void artNounCheck(int Cur, int Ncase = 1)
+        private int artNounCheck(int Cur, int Ncase = 1)
         {
             int cur = Cur;
             int ncase = Ncase;
             int next = cur + 1;
+            int ret = 0;
 
             if (setz[cur].POS == 1 && Ncase != 2 && setz[cur].Text.EndsWith("es"))
             {
@@ -525,12 +954,23 @@ namespace german_recommend_program
                         switch(txt){
                             case "der":
                                 gender = 1;
+                                ret = 1;
                                 break;
                             case "die":
                                 gender = 2;
+                                ret = 5;
                                 break;
                             case "das":
                                 gender = 3;
+                                ret = 5;
+                                break;
+                            case "dem":
+                                gender = 1;
+                                ret = 3;
+                                break;
+                            case "den":
+                                gender = 1;
+                                ret = 4;
                                 break;
                         }
                         addNounRole(1, gender, cur);
@@ -561,6 +1001,7 @@ namespace german_recommend_program
                                 setz[cur].Gender = gender;
                                 addNounRole(3, gender, next);
                                 adjBeforeNounCheck(1, gender, 3, cur, next);
+                                ret = 3;
                             }
                             else if (art.Equals(d_art[gender - 1, 3]))
                             {
@@ -569,6 +1010,7 @@ namespace german_recommend_program
                                 setz[cur].Gender = gender;
                                 addNounRole(4, gender, next);
                                 adjBeforeNounCheck(1, gender, 4, cur, next);
+                                ret = 4;
                             }
                             else
                             {
@@ -581,6 +1023,7 @@ namespace german_recommend_program
                             setz[cur].Gender = gender;
                             addNounRole(nc, gender, next);
                             adjBeforeNounCheck(1, gender, nc, cur, next);
+                            ret = nc;
                         }
                         else if (art.Equals(d_art[0, 1]) && setz[next].Gender == 1 && cur - 1 >= 0)
                         {
@@ -589,6 +1032,7 @@ namespace german_recommend_program
                                 setz[next].N_case = 2;
                                 setz[next].IsFinished = true;
                                 adjBeforeNounCheck(1, gender, 2, cur, next);
+                                ret = 2;
                             }
                             else
                             {
@@ -604,6 +1048,7 @@ namespace german_recommend_program
                                 setz[next].N_case = 2;
                                 setz[next].IsFinished = true;
                                 adjBeforeNounCheck(1, gender, 2, cur, next);
+                                ret = 2;
                             }
                             else
                             {
@@ -618,6 +1063,7 @@ namespace german_recommend_program
                                 setz[next].N_case = 2;
                                 setz[next].IsFinished = true;
                                 adjBeforeNounCheck(1, gender, 2, cur, next);
+                                ret = 2;
                             }
                             else
                             {
@@ -632,6 +1078,7 @@ namespace german_recommend_program
                                 setz[next].N_case = 2;
                                 setz[next].IsFinished = true;
                                 adjBeforeNounCheck(1, gender, 2, cur, next);
+                                ret = 2;
                             }
                             else
                             {
@@ -657,6 +1104,7 @@ namespace german_recommend_program
                                 setz[cur].Gender = gender;
                                 addNounRole(3, gender, next);
                                 adjBeforeNounCheck(1, gender, 3, cur, next);
+                                ret = 3;
                             }
                             else if (art.Equals("ein" + ek_art[gender - 1, 3]))
                             {
@@ -665,6 +1113,7 @@ namespace german_recommend_program
                                 setz[cur].Gender = gender;
                                 addNounRole(4, gender, next);
                                 adjBeforeNounCheck(1, gender, 4, cur, next);
+                                ret = 4;
                             }
                             else
                             {
@@ -678,6 +1127,7 @@ namespace german_recommend_program
                             setz[cur].Gender = gender;
                             addNounRole(nc, gender, next);
                             adjBeforeNounCheck(2, gender, nc, cur, next);
+                            ret = nc;
                         }
                         else if (art.Equals("ein" + ek_art[0, 1]) && setz[next].Gender == 1 && cur - 1 >= 0)
                         {
@@ -686,6 +1136,7 @@ namespace german_recommend_program
                                 setz[next].N_case = 2;
                                 setz[next].IsFinished = true;
                                 adjBeforeNounCheck(2, gender, 2, cur, next);
+                                ret = 2;
                             }
                             else
                             {
@@ -701,6 +1152,7 @@ namespace german_recommend_program
                                 setz[next].N_case = 2;
                                 setz[next].IsFinished = true;
                                 adjBeforeNounCheck(2, gender, 2, cur, next);
+                                ret = 2;
                             }
                             else
                             {
@@ -715,6 +1167,7 @@ namespace german_recommend_program
                                 setz[next].N_case = 2;
                                 setz[next].IsFinished = true;
                                 adjBeforeNounCheck(2, gender, 2, cur, next);
+                                ret = 2;
                             }
                             else
                             {
@@ -739,6 +1192,7 @@ namespace german_recommend_program
                                 setz[cur].Gender = gender;
                                 addNounRole(3, gender, next);
                                 adjBeforeNounCheck(1, gender, 3, cur, next);
+                                ret = 3;
                             }
                             else if (art.Equals("kein" + ek_art[gender - 1, 3]))
                             {
@@ -747,6 +1201,7 @@ namespace german_recommend_program
                                 setz[cur].Gender = gender;
                                 addNounRole(4, gender, next);
                                 adjBeforeNounCheck(1, gender, 4, cur, next);
+                                ret = 4;
                             }
                             else
                             {
@@ -760,6 +1215,7 @@ namespace german_recommend_program
                             setz[cur].Gender = gender;
                             addNounRole(nc, gender, next);
                             adjBeforeNounCheck(2, gender, nc, cur, next);
+                            ret = nc;
                         }
                         else if (art.Equals("kein" + ek_art[0, 1]) && setz[next].Gender == 1 && cur - 1 >= 0)
                         {
@@ -768,6 +1224,7 @@ namespace german_recommend_program
                                 setz[next].N_case = 2;
                                 setz[next].IsFinished = true;
                                 adjBeforeNounCheck(2, gender, 2, cur, next);
+                                ret = 2;
                             }
                             else
                             {
@@ -782,6 +1239,7 @@ namespace german_recommend_program
                                 setz[next].N_case = 2;
                                 setz[next].IsFinished = true;
                                 adjBeforeNounCheck(2, gender, 2, cur, next);
+                                ret = 2;
                             }
                             else
                             {
@@ -796,6 +1254,7 @@ namespace german_recommend_program
                                 setz[next].N_case = 2;
                                 setz[next].IsFinished = true;
                                 adjBeforeNounCheck(2, gender, 2, cur, next);
+                                ret = 2;
                             }
                             else
                             {
@@ -810,6 +1269,7 @@ namespace german_recommend_program
                                 setz[next].N_case = 2;
                                 setz[next].IsFinished = true;
                                 adjBeforeNounCheck(2, gender, 2, cur, next);
+                                ret = 2;
                             }
                             else
                             {
@@ -838,6 +1298,7 @@ namespace german_recommend_program
                                 setz[cur].Gender = gender;
                                 addNounRole(3, gender, next);
                                 adjBeforeNounCheck(1, gender, 3, cur, next);
+                                ret = 3;
                             }
                             else if (art.Equals(match + ek_art[gender - 1, 3]))
                             {
@@ -847,6 +1308,7 @@ namespace german_recommend_program
                                 setz[cur].Gender = gender;
                                 addNounRole(4, gender, next);
                                 adjBeforeNounCheck(1, gender, 4, cur, next);
+                                ret = 4;
                             }
                             else
                             {
@@ -861,6 +1323,7 @@ namespace german_recommend_program
                             setz[cur].Gender = gender;
                             addNounRole(nc, gender, next);
                             adjBeforeNounCheck(2, gender, nc, cur, next);
+                            ret = nc;
                         }
                         else if (art.Equals(match + ek_art[0, 1]) && setz[next].Gender == 1 && cur - 1 >= 0)
                         {
@@ -870,6 +1333,7 @@ namespace german_recommend_program
                                 setz[next].N_case = 2;
                                 setz[next].IsFinished = true;
                                 adjBeforeNounCheck(2, gender, 2, cur, next);
+                                ret = 2;
                             }
                             else
                             {
@@ -885,6 +1349,7 @@ namespace german_recommend_program
                                 setz[next].N_case = 2;
                                 setz[next].IsFinished = true;
                                 adjBeforeNounCheck(2, gender, 2, cur, next);
+                                ret = 2;
                             }
                             else
                             {
@@ -900,6 +1365,7 @@ namespace german_recommend_program
                                 setz[next].N_case = 2;
                                 setz[next].IsFinished = true;
                                 adjBeforeNounCheck(2, gender, 2, cur, next);
+                                ret = 2;
                             }
                             else
                             {
@@ -915,6 +1381,7 @@ namespace german_recommend_program
                                 setz[next].N_case = 2;
                                 setz[next].IsFinished = true;
                                 adjBeforeNounCheck(2, gender, 2, cur, next);
+                                ret = 2;
                             }
                             else
                             {
@@ -934,6 +1401,7 @@ namespace german_recommend_program
                 
                 next++;
             }
+            return ret;
         }
 
         private void adjBeforeNounCheck(int art, int gender, int nc, int cur, int next)
