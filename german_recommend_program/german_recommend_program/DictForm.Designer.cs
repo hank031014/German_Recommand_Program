@@ -566,6 +566,7 @@
             this.Controls.Add(this.rtb_search);
             this.Controls.Add(this.lb_result);
             this.Controls.Add(this.btn_search);
+            this.MaximizeBox = false;
             this.Name = "DictForm";
             this.Text = "字典";
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.DictForm_FormClosed);

@@ -97,6 +97,7 @@
             this.Controls.Add(this.lkb_ding);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
+            this.MaximizeBox = false;
             this.Name = "AboutForm";
             this.Text = "關於程式";
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.AboutForm_FormClosed);

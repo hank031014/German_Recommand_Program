@@ -20,6 +20,9 @@ namespace german_recommend_program
         private DictForm dform;
         private AboutForm aform;
 
+        private int minWidth, minHeight, maxWidth, maxHeight;
+        private float widthScale, heightScale;
+
         public Form1()
         {
             InitializeComponent();
@@ -27,6 +30,16 @@ namespace german_recommend_program
 
         private void Form1_Load(object sender, EventArgs e)
         {
+            minWidth = 1004;
+            minHeight = 458;
+            maxWidth = Screen.PrimaryScreen.Bounds.Width;
+            maxHeight = Screen.PrimaryScreen.Bounds.Height;
+            widthScale = (float)maxWidth / minWidth;
+            heightScale = (float)maxHeight / minHeight;
+
+            this.MinimumSize = new System.Drawing.Size(minWidth, minHeight);
+            this.MaximumSize = new System.Drawing.Size(maxWidth, maxHeight);
+
             ToolTip toolTip1 = new ToolTip();
             lb = new ListBox();
             String cn = @"Data Source=140.116.154.85;" + "Database=german_project;" + "Uid=user;" + "Pwd=!ncku99!;";
@@ -238,6 +251,44 @@ namespace german_recommend_program
                 aform = new AboutForm();
                 aform.Show();
             }
+        }
+
+        private void Form1_SizeChanged(object sender, EventArgs e)
+        {
+            if (this.WindowState == FormWindowState.Maximized)
+            {
+                //Debug.WriteLine(widthScale + ", " + heightScale);
+                displayPanel.Location = new Point((int)(179 * widthScale), (int)(12 * heightScale));
+                displayPanel.Size = new Size((int)(675 * widthScale), (int)(183 * heightScale) + 15);
+
+                writtentxb.Location = new Point((int)(179 * widthScale), (int)(221 * heightScale) - 15);
+                writtentxb.Size = new Size((int)(675 * widthScale), (int)(182 * heightScale));
+
+                btnSwitch.Location = new Point((int)(38 * widthScale), (int)(164 * heightScale) + 30);
+                btn_analyze.Location = new Point((int)(38 * widthScale), (int)(203 * heightScale) + 30);
+                btn_about.Location = new Point((int)(878 * widthScale + 25), (int)(28 * heightScale) + 90);
+                btn_dict.Location = new Point((int)(878 * widthScale + 25), (int)(86 * heightScale) + 120);
+                lb_de.Location = new Point((int)(866 * widthScale + 30), (int)(181 * heightScale) + 84);
+                flowLayoutPanel1.Location = new Point((int)(866 * widthScale + 30), (int)(202 * heightScale) + 70);
+            }
+
+            if (this.Height == minHeight && this.Width == minWidth)
+            {
+                //Debug.WriteLine("min");
+                displayPanel.Location = new Point(179, 12);
+                displayPanel.Size = new Size(675, 183);
+
+                writtentxb.Location = new Point(179, 221);
+                writtentxb.Size = new Size(675, 182);
+
+                btnSwitch.Location = new Point(38, 164);
+                btn_analyze.Location = new Point(38, 203);
+                btn_about.Location = new Point(878, 28);
+                btn_dict.Location = new Point(878, 86);
+                lb_de.Location = new Point(866, 181);
+                flowLayoutPanel1.Location = new Point(866, 202);
+            }
+
         }
 
         
