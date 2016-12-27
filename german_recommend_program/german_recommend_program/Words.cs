@@ -285,19 +285,24 @@ namespace german_recommend_program
 
                 if (poss == 0)
                 {
-                    String f = word.Substring(0, 1);
-                    Regex rgx = new Regex(@"[A-ZÄÖÜ]");
-                    Boolean fistLetter = rgx.IsMatch(f);
-                    if (fistLetter)
+                    if (word != String.Empty)
                     {
-                        pos = 12;
-                        n_case = 1;
+                        String f = word.Substring(0, 1);
+                        Regex rgx = new Regex(@"[A-ZÄÖÜ]");
+                        Boolean fistLetter = rgx.IsMatch(f);
+                        if (fistLetter)
+                        {
+                            pos = 12;
+                            n_case = 1;
+                        }
+                        else
+                        {
+                            isCheck = false;
+                            error_msg = "拼字可能有誤";
+                        }
                     }
-                    else
-                    {
-                        isCheck = false;
-                        error_msg = "拼字可能有誤";
-                    }
+                    
+                    
                     
                 }
             }
@@ -384,7 +389,10 @@ namespace german_recommend_program
                         break;
                 }
             }
-            
+            if (word == "Ich" || word == "ich")
+            {
+                pron_type = 1;
+            }
         }
 
         private void verbVerify()

@@ -37,19 +37,26 @@ namespace german_recommend_program
             String[] tmp = Regex.Split(original_text, separator).Where(s => s != String.Empty).ToArray<String>();
             tmp = (from t in tmp  select t.Trim()).ToArray();
             sentences_stack.Clear();
-
-            for (int i = 0; i < tmp.Length; i++ )
+            if (mode == 0)
             {
-                //Debug.WriteLine("i_" + i + ": " + tmp[i]);
-                Sentence st = new Sentence(i, tmp[i], curForm, db);
-                
-                sentences_stack.Insert(i, st); 
+                for (int i = 0; i < tmp.Length; i++)
+                {
+                    //Debug.WriteLine("i_" + i + ": " + tmp[i]);
+                    Sentence st = new Sentence(i, tmp[i], curForm, db);
+
+                    sentences_stack.Insert(i, st);
+                }
+
+                for (int j = 0; j < sentences_stack.Count; j++)
+                {
+                    //Debug.WriteLine("j_" + j + ": " + sentences_stack[j].Text);
+                    sentences_stack[j].sentenceProperty();
+                }
             }
-
-            for (int j = 0; j < sentences_stack.Count; j++)
+            if (mode == 1)
             {
-                //Debug.WriteLine("j_" + j + ": " + sentences_stack[j].Text);
-                sentences_stack[j].sentenceProperty();
+                Sentence st = new Sentence(tmp.Length - 1, tmp[tmp.Length - 1], curForm, db);
+                st.sentenceProperty(1);
             }
         }
 

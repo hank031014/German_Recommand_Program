@@ -20,6 +20,10 @@ namespace german_recommend_program
         private DictForm dform;
         private AboutForm aform;
 
+        private SqlCommand cmd;
+        private String sql = String.Empty;
+        private OptionWord ow;
+
         private int minWidth, minHeight, maxWidth, maxHeight;
         private float widthScale, heightScale;
 
@@ -66,8 +70,8 @@ namespace german_recommend_program
             writtentxb.Focus();
             writtentxb.TextChanged -= writtentxb_TextChanged;
 
-            listBox1.Items.Add("123");
-            listBox1.Items.Add("AAA");
+            //listBox1.Items.Add("123");
+            //listBox1.Items.Add("AAA");
         }
 
         private void writtentxb_TextChanged(object sender, EventArgs e)
@@ -95,9 +99,6 @@ namespace german_recommend_program
                 btn_analyze.Visible = false;
                 btn_analyze.Enabled = false;
                 //writtentxb.TextChanged += writtentxb_TextChanged;
-
-               
-
             }
             else
             {
@@ -113,6 +114,16 @@ namespace german_recommend_program
         public FlowLayoutPanel getFormPanel()
         {
             return displayPanel;
+        }
+
+        public ListBox getListBox()
+        {
+            return listBox1;
+        }
+
+        public RichTextBox getRichTextBox()
+        {
+            return writtentxb;
         }
 
         private void btn_big_ae_Click(object sender, EventArgs e)
@@ -206,17 +217,11 @@ namespace german_recommend_program
 
         private void writtentxb_KeyUp(object sender, KeyEventArgs e)
         {
-            if (e.KeyCode == Keys.F1)
+            if (btnSwitch.Checked && e.KeyCode == Keys.Space)
             {
-                Point curPoint = writtentxb.GetPositionFromCharIndex(writtentxb.SelectionStart);
-                curPoint.Offset(writtentxb.Left, writtentxb.Top + writtentxb.Font.Height);
-
-                listBox1.Location = curPoint;
-                listBox1.Visible = true;
-                listBox1.BringToFront();
-                listBox1.Focus();
-                //listBox1.Visible = true;
-                Debug.WriteLine("cur point" + curPoint);
+                String wtxt = writtentxb.Text;
+                //displaybox.Text = wtxt;
+                sentenceAnalyzer.textChange(wtxt);               
             }
             else
                 listBox1.Visible = false;
@@ -291,9 +296,66 @@ namespace german_recommend_program
 
         }
 
+        private void listBox1_KeyUp(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter)
+            {
+                if (listBox1.SelectedItem != null)
+                {
+                    writtentxb.Text += listBox1.SelectedItem.ToString();
+
+                    ow = (OptionWord) listBox1.SelectedItem;
+                    if (ow.type == 1)
+                    {
+                        sql = String.Empty;
+                        sql += "UPDATE verb_predict SET times = times + 1 WHERE id = '" + ow.id + "'";
+                        cmd = new SqlCommand(sql, db);
+                    }
+                    if (ow.type == 2)
+                    {
+                        sql = String.Empty;
+                        sql += "UPDATE predict SET times = times + 1 WHERE id = '" + ow.id + "'";
+                        cmd = new SqlCommand(sql, db);
+                    }
+                    cmd.ExecuteNonQuery();
+                    cmd.Dispose();
+                    
+                    listBox1.Items.Clear();
+                    listBox1.Text = String.Empty;
+                    listBox1.Visible = false;
+                    writtentxb.Focus();
+                    writtentxb.Select(writtentxb.Text.Length, 0);
+                }               
+            }
+            else if (listBox1.Visible && (e.KeyValue >= 46 && e.KeyValue <= 90 || e.KeyValue == 8))
+            {
+                if(e.KeyValue >= 48 && e.KeyValue <= 90){
+                    KeysConverter kc = new KeysConverter();
+                    String s = kc.ConvertToString(e.KeyValue);
+                    writtentxb.Text += s.ToLower();
+                }
+                
+                writtentxb.Focus();
+                writtentxb.Select(writtentxb.Text.Length, 0);
+                listBox1.Items.Clear();
+                listBox1.Text = String.Empty;
+                listBox1.Visible = false;
+            }
+        }
+
+        private void listBox1_MouseDoubleClick(object sender, MouseEventArgs e)
+        {
+            if (listBox1.SelectedItem != null)
+            {
+                writtentxb.Text += listBox1.SelectedItem.ToString();
+                listBox1.Items.Clear();
+                listBox1.Text = String.Empty;
+                listBox1.Visible = false;
+                writtentxb.Focus();
+                writtentxb.Select(writtentxb.Text.Length, 0);
+            }
+        }
+
         
-
-
-
     }
 }
