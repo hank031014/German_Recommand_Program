@@ -94,7 +94,7 @@ namespace german_recommend_program
         {
             if (btnSwitch.Checked)
             {
-                btnSwitch.Text = "預測模式";
+                btnSwitch.Text = "建議模式";
                 sentenceAnalyzer.modeChange(1);
                 btn_analyze.Visible = false;
                 btn_analyze.Enabled = false;
